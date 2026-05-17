@@ -12,13 +12,11 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-h
 body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 15% 0%,rgba(37,99,235,.07),transparent 55%),radial-gradient(ellipse at 85% 100%,rgba(16,185,129,.05),transparent 55%);pointer-events:none;z-index:0;}
 .wrap{max-width:960px;margin:0 auto;position:relative;z-index:1;}
 
-/* header */
 .header{display:flex;align-items:center;gap:14px;margin-bottom:24px;}
 .logo{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#1d4ed8,#0891b2);display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 0 30px rgba(37,99,235,.3);flex-shrink:0;}
 .header-text h1{font-size:19px;font-weight:900;}
 .header-text p{font-size:12px;color:var(--muted);margin-top:2px;}
 
-/* setup */
 .setup-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px;margin-bottom:16px;}
 .card-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
 .card-label::before{content:'';width:3px;height:13px;background:var(--accent);border-radius:2px;}
@@ -28,7 +26,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .url-input::placeholder{color:var(--muted);}
 .hint{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.7;}
 
-/* controls */
 .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;}
 input[type=month]{background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:'Cairo',sans-serif;font-size:14px;padding:10px 14px;cursor:pointer;}
 input[type=month]:focus{outline:none;border-color:var(--accent);}
@@ -40,25 +37,71 @@ input[type=month]:focus{outline:none;border-color:var(--accent);}
 .btn-ghost{background:var(--surface2);border:1px solid var(--border);color:var(--text);}
 .btn-ghost:hover{border-color:var(--accent);}
 
-/* metrics */
-.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px;}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px;}
 .metric{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:15px;}
 .metric .lbl{font-size:11px;color:var(--muted);margin-bottom:5px;}
 .metric .val{font-size:26px;font-weight:900;}
 .metric .sub{font-size:10px;color:var(--muted);margin-top:2px;}
 
-/* tabs */
 .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
 .tab{padding:8px 16px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:'Cairo',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;}
 .tab.active{background:rgba(37,99,235,.18);border-color:var(--accent);color:var(--blue-l);}
 .tab:hover:not(.active){border-color:var(--accent);color:var(--text);}
 
-/* card */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px;margin-bottom:12px;}
-
-/* search */
 .search{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Cairo',sans-serif;font-size:13px;padding:9px 13px;margin-bottom:12px;transition:border-color .2s;}
 .search:focus{outline:none;border-color:var(--accent);}
+
+/* ── Employee Card ── */
+.emp-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;transition:border-color .2s;}
+.emp-card:hover{border-color:rgba(37,99,235,.4);}
+.emp-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;flex-wrap:wrap;gap:8px;user-select:none;}
+.emp-header:hover .emp-name{color:var(--blue-l);}
+.emp-left{display:flex;flex-direction:column;gap:3px;}
+.emp-name{font-size:15px;font-weight:900;transition:color .2s;}
+.emp-sub{font-size:11px;color:var(--muted);}
+.emp-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.emp-stat-pill{text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:6px 12px;}
+.esp-val{font-size:15px;font-weight:900;}
+.esp-lbl{font-size:10px;color:var(--muted);}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;}
+.badge.clickable:hover{opacity:.8;}
+.b-ok    {background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.3);}
+.b-warn  {background:rgba(245,158,11,.15);color:#fcd34d;border:1px solid rgba(245,158,11,.3);}
+.b-err   {background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3);}
+.b-info  {background:rgba(37,99,235,.15);color:#93c5fd;border:1px solid rgba(37,99,235,.3);}
+.b-partial{background:rgba(249,115,22,.15);color:#fb923c;border:1px solid rgba(249,115,22,.3);}
+.chevron{font-size:14px;color:var(--muted);transition:transform .25s;margin-right:4px;}
+.chevron.open{transform:rotate(180deg);}
+
+/* ── Day details panel ── */
+.day-panel{display:none;border-top:1px solid var(--border);padding:0 16px 14px;}
+.day-panel.open{display:block;}
+.day-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(30,45,74,.6);flex-wrap:wrap;gap:6px;}
+.day-row:last-child{border-bottom:none;}
+.day-date{font-size:13px;font-weight:700;min-width:90px;}
+.day-day{font-size:11px;color:var(--muted);}
+.day-times{display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+.time-block{font-size:12px;direction:ltr;text-align:left;}
+.time-block .tl{font-size:10px;color:var(--muted);display:block;}
+.day-dur{font-size:13px;font-weight:700;color:var(--yellow);min-width:70px;text-align:center;}
+.day-issue-btn{font-size:11px;cursor:pointer;}
+
+/* ── Issues panel (modal-like) ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:24px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto;}
+.modal-title{font-size:16px;font-weight:900;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;}
+.modal-close{cursor:pointer;font-size:20px;color:var(--muted);background:none;border:none;color:var(--text);}
+.modal-close:hover{color:var(--red);}
+.alert-card{border-radius:12px;padding:13px 15px;margin-bottom:8px;}
+.alert-card.danger{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);}
+.alert-card.warn{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);}
+.alert-title-txt{font-size:13px;font-weight:700;margin-bottom:3px;}
+.alert-card.danger .alert-title-txt{color:#f87171;}
+.alert-card.warn   .alert-title-txt{color:#fcd34d;}
+.alert-desc{font-size:12px;line-height:1.6;}
+.alert-card.danger .alert-desc{color:#fca5a5;}
+.alert-card.warn   .alert-desc{color:#fde68a;}
 
 /* table */
 .tbl-wrap{overflow-x:auto;}
@@ -67,37 +110,6 @@ th{text-align:right;padding:9px 8px;color:var(--muted);font-weight:700;font-size
 td{padding:9px 8px;border-bottom:1px solid var(--border);vertical-align:middle;}
 tr:last-child td{border-bottom:none;}
 tr:hover td{background:var(--surface2);}
-
-/* badges */
-.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;}
-.b-ok{background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.3);}
-.b-warn{background:rgba(245,158,11,.15);color:#fcd34d;border:1px solid rgba(245,158,11,.3);}
-.b-err{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3);}
-.b-info{background:rgba(37,99,235,.15);color:#93c5fd;border:1px solid rgba(37,99,235,.3);}
-.b-partial{background:rgba(249,115,22,.15);color:#fb923c;border:1px solid rgba(249,115,22,.3);}
-
-/* employee summary */
-.emp-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px;}
-.emp-item:last-child{border-bottom:none;}
-.emp-name{font-size:14px;font-weight:700;}
-.emp-role{font-size:11px;color:var(--muted);margin-top:2px;}
-.emp-stats{display:flex;gap:14px;}
-.stat{text-align:center;}
-.stat .sv{font-size:16px;font-weight:900;}
-.stat .sl{font-size:10px;color:var(--muted);}
-.bar-wrap{height:4px;background:var(--border);border-radius:4px;margin-top:5px;width:100px;}
-.bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#1d4ed8,#0891b2);}
-
-/* alerts */
-.alert-card{border-radius:12px;padding:13px 15px;margin-bottom:8px;}
-.alert-card.danger{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);}
-.alert-card.warn{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);}
-.alert-title{font-size:13px;font-weight:700;margin-bottom:3px;}
-.alert-card.danger .alert-title{color:#f87171;}
-.alert-card.warn .alert-title{color:#fcd34d;}
-.alert-desc{font-size:12px;line-height:1.6;}
-.alert-card.danger .alert-desc{color:#fca5a5;}
-.alert-card.warn .alert-desc{color:#fde68a;}
 
 /* chart */
 .chart-container{position:relative;width:100%;height:220px;}
@@ -108,18 +120,23 @@ tr:hover td{background:var(--surface2);}
 .state-icon{font-size:42px;margin-bottom:12px;}
 .state-box p{color:var(--muted);font-size:13px;line-height:1.8;white-space:pre-line;}
 
-/* spinner */
 .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;}
 @keyframes sp{to{transform:rotate(360deg);}}
 
-/* toast */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:11px 20px;font-size:13px;font-weight:700;box-shadow:0 8px 32px rgba(0,0,0,.6);transition:transform .4s cubic-bezier(.34,1.56,.64,1);z-index:999;display:flex;align-items:center;gap:8px;max-width:340px;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:11px 20px;font-size:13px;font-weight:700;box-shadow:0 8px 32px rgba(0,0,0,.6);transition:transform .4s cubic-bezier(.34,1.56,.64,1);z-index:200;display:flex;align-items:center;gap:8px;max-width:340px;}
 .toast.show{transform:translateX(-50%) translateY(0);}
 .toast.ok{border-color:var(--green);color:var(--green);}
 .toast.err{border-color:var(--red);color:var(--red);}
 .toast.warn{border-color:var(--yellow);color:var(--yellow);}
 
-@media(max-width:500px){.emp-stats{gap:8px;}.bar-wrap{width:70px;}}
+.bar-wrap{height:4px;background:var(--border);border-radius:4px;margin-top:5px;width:80px;}
+.bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#1d4ed8,#0891b2);}
+
+@media(max-width:520px){
+  .emp-right{gap:6px;}
+  .emp-stat-pill{padding:5px 8px;}
+  .day-times{gap:8px;}
+}
 </style>
 </head>
 <body>
@@ -133,7 +150,6 @@ tr:hover td{background:var(--surface2);}
     </div>
   </div>
 
-  <!-- إعداد الرابط -->
   <div class="setup-card">
     <div class="card-label">رابط الـ Apps Script</div>
     <div class="url-row">
@@ -145,10 +161,9 @@ tr:hover td{background:var(--surface2);}
         <span id="btnLabel">تحميل</span>
       </button>
     </div>
-    <p class="hint">الرابط بيتحفظ تلقائياً. بعد التحميل اختار الشهر أو اليوم اللي عايزه.</p>
+    <p class="hint">الرابط بيتحفظ تلقائياً. بعد التحميل اختار الشهر أو اليوم.</p>
   </div>
 
-  <!-- التحكم -->
   <div class="controls">
     <input type="month" id="monthPicker" onchange="applyFilter()">
     <button class="btn btn-primary" onclick="applyFilter()">📊 عرض الشهر</button>
@@ -156,20 +171,18 @@ tr:hover td{background:var(--surface2);}
     <button class="btn btn-ghost" onclick="showAll()">📋 كل السجلات</button>
   </div>
 
-  <!-- المقاييس -->
   <div class="metrics" id="metricsRow" style="display:none">
     <div class="metric"><div class="lbl">الشفتات</div><div class="val" id="mTotal" style="color:var(--blue-l)">0</div><div class="sub">سجل</div></div>
     <div class="metric"><div class="lbl">الموظفين</div><div class="val" id="mNames">0</div><div class="sub">اسم</div></div>
-    <div class="metric"><div class="lbl">شفتات كاملة</div><div class="val" id="mFull" style="color:var(--green)">0</div><div class="sub">حضور + انصراف</div></div>
+    <div class="metric"><div class="lbl">شفتات كاملة</div><div class="val" id="mFull" style="color:var(--green)">0</div><div class="sub">حضور+انصراف</div></div>
     <div class="metric"><div class="lbl">متوسط ساعات</div><div class="val" id="mAvg" style="color:var(--yellow)">—</div><div class="sub">لكل شفت</div></div>
     <div class="metric"><div class="lbl">مشاكل</div><div class="val" id="mIssues" style="color:var(--red)">0</div><div class="sub">تحتاج مراجعة</div></div>
   </div>
 
-  <!-- تبويبات -->
   <div class="tabs" id="tabsRow" style="display:none">
-    <button class="tab active" onclick="showTab('summary',this)">👥 ملخص الموظفين</button>
+    <button class="tab active" onclick="showTab('summary',this)">👥 الموظفون</button>
     <button class="tab" onclick="showTab('records',this)">📋 السجلات</button>
-    <button class="tab" onclick="showTab('issues',this)">⚠️ المشاكل</button>
+    <button class="tab" onclick="showTab('issues',this)">⚠️ كل المشاكل</button>
     <button class="tab" onclick="showTab('charts',this)">📈 الرسوم</button>
   </div>
 
@@ -183,373 +196,414 @@ tr:hover td{background:var(--surface2);}
   </div>
 
 </div>
+
+<!-- Modal للمشاكل -->
+<div class="modal-overlay" id="modalOverlay" style="display:none" onclick="closeModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title">
+      <span id="modalTitle">مشاكل الموظف</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"><span id="tIcon"></span><span id="tMsg"></span></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-// ═══════════════════════════════════════════
-//  STATE
-// ═══════════════════════════════════════════
-var ALL_RECORDS  = [];   // كل السجلات من الـ API بعد parsing
-var VIEW_RECORDS = [];   // السجلات المعروضة حسب الفلتر
+var ALL_RECORDS  = [];
+var VIEW_RECORDS = [];
 var ANALYSIS     = {};
 var ISSUES       = [];
 var chartInsts   = [];
 var activeTab    = 'summary';
 
-// ═══════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════
+// ── init ──
 window.onload = function() {
-  var saved = localStorage.getItem('att_api_url');
-  if (saved) document.getElementById('apiUrl').value = saved;
+  var s = localStorage.getItem('att_api_url');
+  if (s) document.getElementById('apiUrl').value = s;
   var now = new Date();
   document.getElementById('monthPicker').value =
     now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
 };
+function saveUrl(){ localStorage.setItem('att_api_url', document.getElementById('apiUrl').value.trim()); }
+function getUrl(){ return document.getElementById('apiUrl').value.trim(); }
 
-function saveUrl() {
-  localStorage.setItem('att_api_url', document.getElementById('apiUrl').value.trim());
-}
-function getUrl() { return document.getElementById('apiUrl').value.trim(); }
-
-// ═══════════════════════════════════════════
-//  PARSERS — يتعاملوا مع format الـ API الحقيقي
-//  date:  "Wed May 13 2026 00:00:00 GMT+0300..."
-//  time:  "Sat Dec 30 1899 09:04:15 GMT+0205..."
-// ═══════════════════════════════════════════
+// ── parsers ──
 function parseDateStr(str) {
   if (!str || str === '—') return null;
-  var d = new Date(str);
-  if (isNaN(d.getTime())) return null;
-  // نأخذ السنة والشهر واليوم من الـ date string مباشرة
-  // لأن الـ timezone قد يغير اليوم لو استخدمنا getDate()
-  var m = str.match(/(\w+)\s+(\w+)\s+(\d+)\s+(\d+)/);
+  var m = str.match(/(\w+)\s+(\d+)\s+(\d{4})/);
   if (!m) return null;
   var months = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',
                 Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
-  var mo = months[m[2]] || '01';
-  var dy = String(m[3]).padStart(2,'0');
-  return m[4] + '-' + mo + '-' + dy;  // yyyy-mm-dd
+  // "Wed May 13 2026" → match[1]=May, match[2]=13, match[3]=2026
+  // البحث في الـ string عن الشهر والسنة
+  var full = str.match(/(\w{3})\s+(\d{1,2})\s+(\d{4})/);
+  if (!full) return null;
+  var mo = months[full[1]];
+  if (!mo) return null;
+  return full[3] + '-' + mo + '-' + String(full[2]).padStart(2,'0');
 }
 
 function parseTimeStr(str) {
   if (!str || str === '—') return null;
-  // الوقت في format "Sat Dec 30 1899 HH:MM:SS GMT..."
   var m = str.match(/(\d{1,2}):(\d{2}):\d{2}\s+GMT/);
   if (!m) return null;
   return String(m[1]).padStart(2,'0') + ':' + m[2];
 }
 
 function timeToMins(t) {
-  if (!t) return null;
+  if (!t || t === '—') return null;
   var p = t.split(':');
   return parseInt(p[0]) * 60 + parseInt(p[1]);
 }
 
-// ═══════════════════════════════════════════
-//  FETCH — يجيب كل البيانات مرة واحدة
-// ═══════════════════════════════════════════
+function fmtDur(mins) {
+  if (!mins || mins <= 0) return '—';
+  return Math.floor(mins/60) + 'س ' + Math.round(mins%60) + 'د';
+}
+
+// ── fetch ──
 function loadAll() {
   var url = getUrl();
-  if (!url) { toast('الصق رابط الـ API أولاً', 'warn'); return; }
+  if (!url) { toast('الصق رابط الـ API أولاً','warn'); return; }
   setLoading(true);
-
   fetch(url)
-    .then(function(r) { return r.json(); })
+    .then(function(r){ return r.json(); })
     .then(function(d) {
       setLoading(false);
-      if (d.status !== 'success') {
-        showState('❌', d.message || 'خطأ غير معروف');
-        return;
-      }
-
+      if (d.status !== 'success') { showState('❌', d.message||'خطأ'); return; }
       var raw = d.records || [];
-      if (!raw.length) {
-        showState('📭', 'لا توجد سجلات في الشيت بعد.');
-        return;
-      }
-
-      // ── parse كل record ──
+      if (!raw.length) { showState('📭','لا توجد سجلات في الشيت بعد.'); return; }
+      var dayMap = {Sunday:'الأحد',Monday:'الاثنين',Tuesday:'الثلاثاء',
+                    Wednesday:'الأربعاء',Thursday:'الخميس',Friday:'الجمعة',Saturday:'السبت'};
       ALL_RECORDS = [];
       raw.forEach(function(r) {
-        var dateStr = parseDateStr(String(r.date || ''));
-        var inTime  = parseTimeStr(String(r.inTime  || ''));
-        var outTime = parseTimeStr(String(r.outTime || ''));
-        var name    = String(r.name || '').trim();
-        var type    = String(r.type || '').trim();
-        var role    = String(r.role || '').replace(/\s*\+\s*تحديد الوظيفة/g, '').trim();
-        var dayMap  = {Sunday:'الأحد',Monday:'الاثنين',Tuesday:'الثلاثاء',
-                       Wednesday:'الأربعاء',Thursday:'الخميس',Friday:'الجمعة',Saturday:'السبت'};
-        var day     = dayMap[r.day] || String(r.day || '');
-
+        var dateStr = parseDateStr(String(r.date||''));
+        var inTime  = parseTimeStr(String(r.inTime||''));
+        var outTime = parseTimeStr(String(r.outTime||''));
+        var name    = String(r.name||'').trim();
+        var type    = String(r.type||'').trim();
+        var role    = String(r.role||'').replace(/\s*\+\s*تحديد الوظيفة/g,'').trim();
+        var day     = dayMap[r.day] || String(r.day||'');
         if (!name || !dateStr) return;
-
-        ALL_RECORDS.push({
-          date:    dateStr,
-          day:     day,
-          name:    name,
-          type:    type,
-          role:    role,
-          inTime:  inTime  || '—',
-          outTime: outTime || '—'
-        });
+        ALL_RECORDS.push({ date:dateStr, day:day, name:name, type:type,
+                           role:role, inTime:inTime||'—', outTime:outTime||'—' });
       });
-
-      toast('تم تحميل ' + ALL_RECORDS.length + ' شفت من الـ API ✅', 'ok');
-      applyFilter();  // عرض الشهر المختار تلقائياً
+      toast('تم تحميل '+ALL_RECORDS.length+' شفت ✅','ok');
+      applyFilter();
     })
     .catch(function(e) {
       setLoading(false);
-      showState('❌', 'فشل الاتصال: ' + e.message + '\n\nتأكد من إعدادات Deploy → "Anyone"');
-      toast('فشل الاتصال', 'err');
+      showState('❌','فشل الاتصال: '+e.message+'\n\nتأكد من Deploy → "Anyone"');
+      toast('فشل الاتصال','err');
     });
 }
 
-// ═══════════════════════════════════════════
-//  FILTERS
-// ═══════════════════════════════════════════
+// ── filters ──
 function applyFilter() {
-  if (!ALL_RECORDS.length) { toast('حمّل البيانات أولاً', 'warn'); return; }
-  var month = document.getElementById('monthPicker').value; // "2026-05"
-  VIEW_RECORDS = ALL_RECORDS.filter(function(r) {
-    return r.date && r.date.indexOf(month) === 0;
-  });
+  if (!ALL_RECORDS.length) { toast('حمّل البيانات أولاً','warn'); return; }
+  var month = document.getElementById('monthPicker').value;
+  VIEW_RECORDS = ALL_RECORDS.filter(function(r){ return r.date && r.date.indexOf(month) === 0; });
   if (!VIEW_RECORDS.length) {
-    showState('📭', 'لا توجد سجلات لشهر ' + month + '\nالبيانات المتاحة من ' + getDateRange());
+    var dates = ALL_RECORDS.map(function(r){return r.date;}).sort();
+    showState('📭','لا توجد سجلات لشهر '+month+'\nالبيانات المتاحة: '+dates[0]+' → '+dates[dates.length-1]);
     return;
   }
-  buildAndRender('شهر ' + month);
+  buildAndRender();
 }
 
 function showToday() {
-  if (!ALL_RECORDS.length) { toast('حمّل البيانات أولاً', 'warn'); return; }
+  if (!ALL_RECORDS.length) { toast('حمّل البيانات أولاً','warn'); return; }
   var now = new Date();
-  var today = now.getFullYear() + '-' +
-    String(now.getMonth()+1).padStart(2,'0') + '-' +
-    String(now.getDate()).padStart(2,'0');
-  VIEW_RECORDS = ALL_RECORDS.filter(function(r) { return r.date === today; });
-  if (!VIEW_RECORDS.length) {
-    showState('📭', 'لا توجد سجلات لليوم: ' + today);
-    return;
-  }
-  buildAndRender('اليوم ' + today);
+  var today = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+  VIEW_RECORDS = ALL_RECORDS.filter(function(r){ return r.date === today; });
+  if (!VIEW_RECORDS.length) { showState('📭','لا توجد سجلات لليوم: '+today); return; }
+  buildAndRender();
 }
 
 function showAll() {
-  if (!ALL_RECORDS.length) { toast('حمّل البيانات أولاً', 'warn'); return; }
+  if (!ALL_RECORDS.length) { toast('حمّل البيانات أولاً','warn'); return; }
   VIEW_RECORDS = ALL_RECORDS.slice();
-  buildAndRender('كل السجلات');
+  buildAndRender();
 }
 
-function getDateRange() {
-  if (!ALL_RECORDS.length) return '—';
-  var dates = ALL_RECORDS.map(function(r){ return r.date; }).sort();
-  return dates[0] + ' → ' + dates[dates.length-1];
-}
-
-// ═══════════════════════════════════════════
-//  BUILD ANALYSIS
-// ═══════════════════════════════════════════
-function buildAndRender(label) {
-  ISSUES   = [];
+// ── analyze ──
+function buildAndRender() {
+  ISSUES = [];
   ANALYSIS = {};
 
   VIEW_RECORDS.forEach(function(r) {
     var n = r.name;
-    if (!ANALYSIS[n]) ANALYSIS[n] = {name:n, job:r.role, days:new Set(), totalMins:0};
+    if (!ANALYSIS[n]) ANALYSIS[n] = { name:n, job:r.role, days:{}, totalMins:0 };
     var a = ANALYSIS[n];
     if (!a.job && r.role) a.job = r.role;
-    a.days.add(r.date);
+    if (!a.days[r.date]) a.days[r.date] = { date:r.date, day:r.day, records:[] };
+    a.days[r.date].records.push(r);
 
     var inM  = timeToMins(r.inTime);
     var outM = timeToMins(r.outTime);
-    var mins = 0;
-
     if (r.type === 'كامل' && inM !== null && outM !== null) {
-      mins = outM - inM;
-      if (mins < 0) mins += 24 * 60;  // وردة ليلية
+      var mins = outM - inM;
+      if (mins < 0) mins += 24*60;
       a.totalMins += mins;
     }
 
-    // اكتشاف المشاكل
+    // مشاكل
     if (r.type === 'انصراف فقط')
-      ISSUES.push({sev:'danger', name:n, date:r.date,
-        title:'❌ ' + n + ' — انصراف بدون حضور (' + r.date + ')',
-        desc:'انصراف مسجل الساعة ' + r.outTime + ' بدون أي حضور في نفس اليوم.'});
+      ISSUES.push({sev:'danger',name:n,date:r.date,
+        title:'❌ '+n+' — انصراف بدون حضور ('+r.date+')',
+        desc:'انصراف الساعة '+r.outTime+' بدون أي حضور في نفس اليوم.'});
 
     if (r.type === 'حضور فقط')
-      ISSUES.push({sev:'warn', name:n, date:r.date,
-        title:'⚠️ ' + n + ' — حضور بدون انصراف (' + r.date + ')',
-        desc:'حضور مسجل الساعة ' + r.inTime + ' بدون تسجيل انصراف.'});
+      ISSUES.push({sev:'warn',name:n,date:r.date,
+        title:'⚠️ '+n+' — حضور بدون انصراف ('+r.date+')',
+        desc:'حضور الساعة '+r.inTime+' بدون تسجيل انصراف.'});
 
     if (r.type === 'كامل' && inM !== null && outM !== null && outM < inM)
-      ISSUES.push({sev:'warn', name:n, date:r.date,
-        title:'🌙 ' + n + ' — وردة ليلية تمتد للغد (' + r.date + ')',
-        desc:'حضور ' + r.inTime + ' وانصراف ' + r.outTime + ' — الوردة ممتدة لفجر اليوم التالي.'});
+      ISSUES.push({sev:'warn',name:n,date:r.date,
+        title:'🌙 '+n+' — وردة ليلية ('+r.date+')',
+        desc:'حضور '+r.inTime+' وانصراف '+r.outTime+' — الوردة ممتدة لفجر اليوم التالي.'});
 
-    // حضور وانصراف بفارق ثوانٍ (تسجيل خاطئ)
     if (r.type === 'كامل' && inM !== null && outM !== null) {
       var diff = outM - inM;
       if (diff >= 0 && diff < 2)
-        ISSUES.push({sev:'warn', name:n, date:r.date,
-          title:'⚠️ ' + n + ' — حضور وانصراف بفارق ثوانٍ (' + r.date + ')',
-          desc:'الحضور ' + r.inTime + ' والانصراف ' + r.outTime + ' — يبدو تسجيل خاطئ.'});
+        ISSUES.push({sev:'warn',name:n,date:r.date,
+          title:'⚠️ '+n+' — تسجيل خاطئ ('+r.date+')',
+          desc:'الحضور '+r.inTime+' والانصراف '+r.outTime+' — فارق أقل من دقيقتين.'});
     }
   });
 
-  // update metrics
-  var names      = Object.keys(ANALYSIS);
-  var fullShifts = VIEW_RECORDS.filter(function(r){ return r.type === 'كامل'; }).length;
-  var totalH = 0, cnt = 0;
-  names.forEach(function(n){
-    var h = ANALYSIS[n].totalMins / 60;
-    if (h > 0) { totalH += h; cnt++; }
+  // حساب مدة كل يوم
+  Object.keys(ANALYSIS).forEach(function(n) {
+    Object.keys(ANALYSIS[n].days).forEach(function(date) {
+      var dayObj = ANALYSIS[n].days[date];
+      dayObj.mins = 0;
+      dayObj.records.forEach(function(r) {
+        var inM = timeToMins(r.inTime), outM = timeToMins(r.outTime);
+        if (r.type === 'كامل' && inM !== null && outM !== null) {
+          var m = outM - inM; if (m < 0) m += 24*60;
+          dayObj.mins += m;
+        }
+      });
+      dayObj.issues = ISSUES.filter(function(i){ return i.name===n && i.date===date; });
+    });
   });
 
-  document.getElementById('mTotal').textContent  = VIEW_RECORDS.length;
-  document.getElementById('mNames').textContent  = names.length;
-  document.getElementById('mFull').textContent   = fullShifts;
-  document.getElementById('mAvg').textContent    = cnt ? (totalH/cnt).toFixed(1) : '—';
-  document.getElementById('mIssues').textContent = ISSUES.length;
+  // metrics
+  var names = Object.keys(ANALYSIS);
+  var fullShifts = VIEW_RECORDS.filter(function(r){ return r.type==='كامل'; }).length;
+  var totalH=0, cnt=0;
+  names.forEach(function(n){
+    var h = ANALYSIS[n].totalMins/60;
+    if (h > 0) { totalH += h; cnt++; }
+  });
+  document.getElementById('mTotal').textContent   = VIEW_RECORDS.length;
+  document.getElementById('mNames').textContent   = names.length;
+  document.getElementById('mFull').textContent    = fullShifts;
+  document.getElementById('mAvg').textContent     = cnt ? (totalH/cnt).toFixed(1) : '—';
+  document.getElementById('mIssues').textContent  = ISSUES.length;
   document.getElementById('metricsRow').style.display = 'grid';
   document.getElementById('tabsRow').style.display    = 'flex';
-
   renderTab(activeTab);
-  toast('عرض ' + VIEW_RECORDS.length + ' شفت — ' + label, 'ok');
+  toast('عرض '+VIEW_RECORDS.length+' شفت لـ '+names.length+' موظف','ok');
 }
 
-// ═══════════════════════════════════════════
-//  TABS
-// ═══════════════════════════════════════════
+// ── tabs ──
 function showTab(id, btn) {
   activeTab = id;
   document.querySelectorAll('.tab').forEach(function(b){ b.classList.remove('active'); });
   if (btn) btn.classList.add('active');
   renderTab(id);
 }
-
 function renderTab(id) {
-  chartInsts.forEach(function(c){ try{ c.destroy(); }catch(e){} });
+  chartInsts.forEach(function(c){ try{c.destroy();}catch(e){} });
   chartInsts = [];
-  if      (id === 'summary') renderSummary();
-  else if (id === 'records') renderRecords();
-  else if (id === 'issues')  renderIssues();
-  else if (id === 'charts')  renderCharts();
+  if      (id==='summary') renderSummary();
+  else if (id==='records') renderRecords();
+  else if (id==='issues')  renderAllIssues();
+  else if (id==='charts')  renderCharts();
 }
 
-// ─── ملخص الموظفين ───
+// ══════════════════════════════════════════
+//  TAB 1 — ملخص الموظفين (قابل للتوسيع)
+// ══════════════════════════════════════════
 function renderSummary() {
   var names = Object.keys(ANALYSIS).sort(function(a,b){
     return ANALYSIS[b].totalMins - ANALYSIS[a].totalMins;
   });
-  var maxMins = names.length
-    ? Math.max.apply(null, names.map(function(n){ return ANALYSIS[n].totalMins; }))
-    : 1;
-  if (!maxMins) maxMins = 1;
+  var maxMins = 1;
+  names.forEach(function(n){ if (ANALYSIS[n].totalMins > maxMins) maxMins = ANALYSIS[n].totalMins; });
 
-  var html = '<div class="card"><div class="card-label">ملخص كل موظف</div>';
+  var html = '<div class="card"><div class="card-label">الموظفون — اضغط لعرض تفاصيل الأيام</div>';
   html += '<input class="search" type="text" placeholder="🔍 ابحث باسم الموظف..." oninput="filterEmp(this.value)">';
   html += '<div id="empList">';
 
-  names.forEach(function(n) {
-    var a    = ANALYSIS[n];
-    var hrs  = Math.floor(a.totalMins / 60);
-    var mins = Math.round(a.totalMins % 60);
-    var days = a.days.size;
-    var avgH = (days && a.totalMins) ? (a.totalMins / 60 / days).toFixed(1) : '—';
-    var pct  = Math.round((a.totalMins / maxMins) * 100);
-    var bcls = a.totalMins === 0 ? 'b-err' : (a.totalMins >= 360 ? 'b-ok' : 'b-partial');
-    var btxt = a.totalMins === 0 ? 'بدون انصراف' : (a.totalMins >= 360 ? 'طبيعي' : 'جزئي');
-    var iss  = ISSUES.filter(function(i){ return i.name === n; }).length;
+  names.forEach(function(n, idx) {
+    var a      = ANALYSIS[n];
+    var daysArr = Object.values(a.days).sort(function(x,y){ return y.date.localeCompare(x.date); });
+    var dCount = daysArr.length;
+    var hrs    = Math.floor(a.totalMins/60);
+    var mins   = Math.round(a.totalMins%60);
+    var avgH   = dCount && a.totalMins ? (a.totalMins/60/dCount).toFixed(1) : '—';
+    var pct    = Math.round((a.totalMins/maxMins)*100);
+    var iss    = ISSUES.filter(function(i){ return i.name===n; });
+    var hasIss = iss.length > 0;
+    var bcls   = a.totalMins===0 ? 'b-err' : (a.totalMins>=360 ? 'b-ok' : 'b-partial');
+    var btxt   = a.totalMins===0 ? 'بدون انصراف' : (a.totalMins>=360 ? 'طبيعي' : 'جزئي');
+    var panelId = 'panel_' + idx;
+    var chevId  = 'chev_'  + idx;
 
-    html += '<div class="emp-item" data-name="' + n.toLowerCase() + '">';
-    html += '<div style="min-width:0">';
-    html += '<div class="emp-name">' + n;
-    if (iss) html += '  <span class="badge b-err">' + iss + ' مشكلة</span>';
+    html += '<div class="emp-card" data-name="'+n.toLowerCase()+'">';
+
+    // header
+    html += '<div class="emp-header" onclick="togglePanel(\''+panelId+'\',\''+chevId+'\')">';
+    html += '<div class="emp-left">';
+    html += '<div class="emp-name">'+n+'</div>';
+    html += '<div class="emp-sub">'+a.job+'</div>';
+    html += '<div style="margin-top:5px"><div class="bar-wrap"><div class="bar-fill" style="width:'+pct+'%"></div></div></div>';
     html += '</div>';
-    html += '<div class="emp-role">' + (a.job || '—') + '</div>';
-    html += '<div class="bar-wrap"><div class="bar-fill" style="width:' + pct + '%"></div></div>';
-    html += '</div>';
-    html += '<div class="emp-stats">';
-    html += '<div class="stat"><div class="sv" style="color:var(--blue-l)">' + days + '</div><div class="sl">يوم</div></div>';
-    html += '<div class="stat"><div class="sv" style="color:var(--green)">' + hrs + 'س ' + mins + 'د</div><div class="sl">إجمالي</div></div>';
-    html += '<div class="stat"><div class="sv" style="color:var(--yellow)">' + avgH + '</div><div class="sl">س/يوم</div></div>';
-    html += '<div class="stat"><span class="badge ' + bcls + '">' + btxt + '</span></div>';
+    html += '<div class="emp-right">';
+    html += '<div class="emp-stat-pill"><div class="esp-val" style="color:var(--blue-l)">'+dCount+'</div><div class="esp-lbl">يوم</div></div>';
+    html += '<div class="emp-stat-pill"><div class="esp-val" style="color:var(--green)">'+hrs+'س '+mins+'د</div><div class="esp-lbl">إجمالي</div></div>';
+    html += '<div class="emp-stat-pill"><div class="esp-val" style="color:var(--yellow)">'+avgH+'</div><div class="esp-lbl">س/يوم</div></div>';
+    html += '<span class="badge '+bcls+'">'+btxt+'</span>';
+    if (hasIss) html += ' <span class="badge b-err clickable" onclick="event.stopPropagation();showEmpIssues(\''+n+'\')">'+iss.length+' مشكلة ⚠️</span>';
+    html += '<span class="chevron" id="'+chevId+'">▾</span>';
     html += '</div></div>';
+
+    // day details panel
+    html += '<div class="day-panel" id="'+panelId+'">';
+    daysArr.forEach(function(dayObj) {
+      var rec   = dayObj.records[0];
+      var dur   = fmtDur(dayObj.mins);
+      var dIss  = dayObj.issues;
+      var rowCls = dIss.length > 0 ? 'style="background:rgba(239,68,68,.04)"' : '';
+
+      html += '<div class="day-row" '+rowCls+'>';
+      html += '<div>';
+      html += '<div class="day-date">'+dayObj.date+'</div>';
+      html += '<div class="day-day">'+dayObj.day+'</div>';
+      html += '</div>';
+      html += '<div class="day-times">';
+      html += '<div class="time-block"><span class="tl">حضور</span><span style="color:var(--green);font-weight:700">'+rec.inTime+'</span></div>';
+      html += '<div class="time-block"><span class="tl">انصراف</span><span style="color:var(--red);font-weight:700">'+rec.outTime+'</span></div>';
+      html += '</div>';
+      html += '<div class="day-dur">'+dur+'</div>';
+      if (dIss.length) {
+        html += '<span class="badge b-err clickable day-issue-btn" onclick="showDayIssues(\''+n+'\',\''+dayObj.date+'\')">⚠️ '+dIss.length+'</span>';
+      } else {
+        html += '<span class="badge b-ok">✓</span>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';  // day-panel
+
+    html += '</div>';  // emp-card
   });
 
   html += '</div></div>';
   document.getElementById('contentArea').innerHTML = html;
 }
 
+function togglePanel(panelId, chevId) {
+  var p = document.getElementById(panelId);
+  var c = document.getElementById(chevId);
+  if (!p) return;
+  p.classList.toggle('open');
+  c.classList.toggle('open');
+}
+
 function filterEmp(q) {
   q = q.toLowerCase();
-  document.querySelectorAll('#empList .emp-item').forEach(function(el){
+  document.querySelectorAll('#empList .emp-card').forEach(function(el){
     el.style.display = el.dataset.name.indexOf(q) > -1 ? '' : 'none';
   });
 }
 
-// ─── السجلات ───
+// ══════════════════════════════════════════
+//  MODAL — مشاكل موظف
+// ══════════════════════════════════════════
+function showEmpIssues(name) {
+  var iss = ISSUES.filter(function(i){ return i.name === name; });
+  openModal(name + ' — المشاكل', iss);
+}
+
+function showDayIssues(name, date) {
+  var iss = ISSUES.filter(function(i){ return i.name === name && i.date === date; });
+  openModal(name + ' — ' + date, iss);
+}
+
+function openModal(title, iss) {
+  document.getElementById('modalTitle').textContent = title;
+  var html = '';
+  if (!iss.length) {
+    html = '<p style="color:var(--muted);text-align:center;padding:20px">لا توجد مشاكل ✅</p>';
+  } else {
+    iss.forEach(function(i){
+      html += '<div class="alert-card '+i.sev+'">';
+      html += '<div class="alert-title-txt">'+i.title+'</div>';
+      html += '<div class="alert-desc">'+i.desc+'</div>';
+      html += '</div>';
+    });
+  }
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('modalOverlay').style.display = 'flex';
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modalOverlay'))
+    document.getElementById('modalOverlay').style.display = 'none';
+}
+
+document.addEventListener('keydown', function(e){ if (e.key==='Escape') closeModal(); });
+
+// ══════════════════════════════════════════
+//  TAB 2 — السجلات
+// ══════════════════════════════════════════
 function renderRecords() {
   var sorted = VIEW_RECORDS.slice().sort(function(a,b){
-    var dd = b.date.localeCompare(a.date);
-    if (dd) return dd;
-    return (a.inTime||'').localeCompare(b.inTime||'');
+    return b.date.localeCompare(a.date) || (a.inTime||'').localeCompare(b.inTime||'');
   });
-
-  var html = '<div class="card"><div class="card-label">السجلات (' + sorted.length + ')</div>';
-  html += '<input class="search" type="text" placeholder="🔍 ابحث باسم أو تاريخ أو وظيفة..." oninput="filterRec(this.value)">';
-  html += '<div class="tbl-wrap"><table id="recTable">';
-  html += '<thead><tr><th>الموظف</th><th>التاريخ</th><th>اليوم</th><th>الحالة</th><th>حضور</th><th>انصراف</th><th>المدة</th><th>الوظيفة</th></tr></thead><tbody>';
-
+  var html = '<div class="card"><div class="card-label">جميع السجلات ('+sorted.length+')</div>';
+  html += '<input class="search" type="text" placeholder="🔍 ابحث..." oninput="filterRec(this.value)">';
+  html += '<div class="tbl-wrap"><table id="recTable"><thead><tr>';
+  html += '<th>الموظف</th><th>التاريخ</th><th>اليوم</th><th>الحالة</th><th>حضور</th><th>انصراف</th><th>المدة</th><th>الوظيفة</th>';
+  html += '</tr></thead><tbody>';
   sorted.forEach(function(r) {
-    var cls = r.type==='كامل' ? 'b-ok' : (r.type==='حضور فقط' ? 'b-info' : 'b-warn');
-    var s   = (r.name + ' ' + r.date + ' ' + r.role).toLowerCase();
-
-    var dur = '—';
-    var inM = timeToMins(r.inTime), outM = timeToMins(r.outTime);
-    if (r.type === 'كامل' && inM !== null && outM !== null) {
-      var d = outM - inM; if (d < 0) d += 24*60;
-      dur = Math.floor(d/60) + 'س ' + Math.round(d%60) + 'د';
-    }
-
-    html += '<tr data-s="' + s + '">';
-    html += '<td style="font-weight:700">' + r.name + '</td>';
-    html += '<td style="font-size:11px">' + r.date + '</td>';
-    html += '<td style="color:var(--muted);font-size:11px">' + r.day + '</td>';
-    html += '<td><span class="badge ' + cls + '">' + r.type + '</span></td>';
-    html += '<td style="color:var(--green);font-size:12px;direction:ltr;text-align:right">' + r.inTime + '</td>';
-    html += '<td style="color:var(--red);font-size:12px;direction:ltr;text-align:right">'   + r.outTime + '</td>';
-    html += '<td style="color:var(--yellow);font-size:12px">' + dur + '</td>';
-    html += '<td style="color:var(--muted);font-size:11px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + r.role + '">' + r.role + '</td>';
+    var cls = r.type==='كامل'?'b-ok':(r.type==='حضور فقط'?'b-info':'b-warn');
+    var s   = (r.name+' '+r.date+' '+r.role).toLowerCase();
+    var inM=timeToMins(r.inTime), outM=timeToMins(r.outTime), dur='—';
+    if (r.type==='كامل' && inM!==null && outM!==null){ var d=outM-inM; if(d<0)d+=24*60; dur=fmtDur(d); }
+    html += '<tr data-s="'+s+'">';
+    html += '<td style="font-weight:700">'+r.name+'</td><td style="font-size:11px">'+r.date+'</td>';
+    html += '<td style="color:var(--muted);font-size:11px">'+r.day+'</td>';
+    html += '<td><span class="badge '+cls+'">'+r.type+'</span></td>';
+    html += '<td style="color:var(--green);direction:ltr;text-align:right">'+r.inTime+'</td>';
+    html += '<td style="color:var(--red);direction:ltr;text-align:right">'+r.outTime+'</td>';
+    html += '<td style="color:var(--yellow)">'+dur+'</td>';
+    html += '<td style="color:var(--muted);font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+r.role+'">'+r.role+'</td>';
     html += '</tr>';
   });
-
   html += '</tbody></table></div></div>';
   document.getElementById('contentArea').innerHTML = html;
 }
+function filterRec(q){ q=q.toLowerCase(); document.querySelectorAll('#recTable tbody tr').forEach(function(r){ r.style.display=r.dataset.s.indexOf(q)>-1?'':'none'; }); }
 
-function filterRec(q) {
-  q = q.toLowerCase();
-  document.querySelectorAll('#recTable tbody tr').forEach(function(r){
-    r.style.display = r.dataset.s.indexOf(q) > -1 ? '' : 'none';
-  });
-}
-
-// ─── المشاكل ───
-function renderIssues() {
-  var html = '<div class="card"><div class="card-label">مشاكل مكتشفة (' + ISSUES.length + ')</div>';
+// ══════════════════════════════════════════
+//  TAB 3 — كل المشاكل
+// ══════════════════════════════════════════
+function renderAllIssues() {
+  var html = '<div class="card"><div class="card-label">كل المشاكل ('+ISSUES.length+')</div>';
   if (!ISSUES.length) {
     html += '<div class="state-box"><div class="state-icon">✅</div><p>لا توجد مشاكل في هذه الفترة 🎉</p></div>';
   } else {
-    var sorted = ISSUES.slice().sort(function(a,b){
-      return a.sev==='danger' && b.sev!=='danger' ? -1 : b.sev==='danger' && a.sev!=='danger' ? 1 : 0;
-    });
-    sorted.forEach(function(iss){
-      html += '<div class="alert-card ' + iss.sev + '">';
-      html += '<div class="alert-title">' + iss.title + '</div>';
-      html += '<div class="alert-desc">'  + iss.desc  + '</div>';
+    var sorted = ISSUES.slice().sort(function(a,b){ return a.sev==='danger'&&b.sev!=='danger'?-1:b.sev==='danger'&&a.sev!=='danger'?1:0; });
+    sorted.forEach(function(i){
+      html += '<div class="alert-card '+i.sev+'">';
+      html += '<div class="alert-title-txt">'+i.title+'</div>';
+      html += '<div class="alert-desc">'+i.desc+'</div>';
       html += '</div>';
     });
   }
@@ -557,99 +611,54 @@ function renderIssues() {
   document.getElementById('contentArea').innerHTML = html;
 }
 
-// ─── الرسوم ───
+// ══════════════════════════════════════════
+//  TAB 4 — الرسوم
+// ══════════════════════════════════════════
 function renderCharts() {
-  var dayMap = {};
-  VIEW_RECORDS.forEach(function(r){
-    if (r.date) dayMap[r.date] = (dayMap[r.date]||0) + 1;
-  });
-  var days      = Object.keys(dayMap).sort();
-  var dayCounts = days.map(function(d){ return dayMap[d]; });
-  var dayLabels = days.map(function(d){
-    var p = d.split('-'); return p[2] + '/' + p[1];
-  });
+  var dayMap={};
+  VIEW_RECORDS.forEach(function(r){ if(r.date) dayMap[r.date]=(dayMap[r.date]||0)+1; });
+  var days=Object.keys(dayMap).sort();
+  var dayLabels=days.map(function(d){ var p=d.split('-'); return p[2]+'/'+p[1]; });
+  var dayCounts=days.map(function(d){ return dayMap[d]; });
 
-  var names = Object.keys(ANALYSIS)
-    .filter(function(n){ return ANALYSIS[n].totalMins > 0; })
-    .sort(function(a,b){ return ANALYSIS[b].totalMins - ANALYSIS[a].totalMins; });
-  var hData = names.map(function(n){ return +(ANALYSIS[n].totalMins/60).toFixed(1); });
+  var names=Object.keys(ANALYSIS).filter(function(n){ return ANALYSIS[n].totalMins>0; })
+    .sort(function(a,b){ return ANALYSIS[b].totalMins-ANALYSIS[a].totalMins; });
+  var hData=names.map(function(n){ return +(ANALYSIS[n].totalMins/60).toFixed(1); });
 
-  var html = '';
-  html += '<div class="card"><div class="card-label">السجلات اليومية</div>';
-  html += '<div class="chart-container"><canvas id="dayChart" role="img" aria-label="عدد سجلات الحضور لكل يوم">توزيع السجلات اليومية.</canvas></div></div>';
-  html += '<div class="card"><div class="card-label">إجمالي ساعات العمل لكل موظف</div>';
-  html += '<div class="chart-container tall"><canvas id="hrChart" role="img" aria-label="ساعات عمل كل موظف">مقارنة ساعات عمل الموظفين.</canvas></div></div>';
+  var html='';
+  html+='<div class="card"><div class="card-label">السجلات اليومية</div><div class="chart-container"><canvas id="dayChart" role="img" aria-label="سجلات الحضور اليومية">توزيع السجلات اليومية.</canvas></div></div>';
+  html+='<div class="card"><div class="card-label">إجمالي ساعات كل موظف</div><div class="chart-container tall"><canvas id="hrChart" role="img" aria-label="ساعات عمل الموظفين">ساعات عمل الموظفين.</canvas></div></div>';
+  document.getElementById('contentArea').innerHTML=html;
 
-  document.getElementById('contentArea').innerHTML = html;
+  setTimeout(function(){
+    var c1=document.getElementById('dayChart');
+    if(c1&&typeof Chart!=='undefined') chartInsts.push(new Chart(c1,{type:'bar',data:{labels:dayLabels,datasets:[{label:'شفتات',data:dayCounts,backgroundColor:'rgba(37,99,235,.7)',borderColor:'#2563eb',borderWidth:1,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#64748b',font:{size:11},autoSkip:true,maxRotation:45},grid:{color:'rgba(30,45,74,.6)'}},y:{beginAtZero:true,ticks:{color:'#64748b',stepSize:1,font:{size:11}},grid:{color:'rgba(30,45,74,.6)'}}}}  }));
 
-  setTimeout(function() {
-    var c1 = document.getElementById('dayChart');
-    if (c1 && typeof Chart !== 'undefined') {
-      chartInsts.push(new Chart(c1, {
-        type: 'bar',
-        data: { labels: dayLabels, datasets: [{
-          label:'شفتات', data:dayCounts,
-          backgroundColor:'rgba(37,99,235,.7)', borderColor:'#2563eb',
-          borderWidth:1, borderRadius:5
-        }]},
-        options: { responsive:true, maintainAspectRatio:false,
-          plugins:{ legend:{display:false} },
-          scales:{
-            x:{ ticks:{color:'#64748b',font:{size:11},autoSkip:true,maxRotation:45}, grid:{color:'rgba(30,45,74,.6)'} },
-            y:{ beginAtZero:true, ticks:{color:'#64748b',stepSize:1,font:{size:11}}, grid:{color:'rgba(30,45,74,.6)'} }
-          }
-        }
-      }));
-    }
-
-    var c2 = document.getElementById('hrChart');
-    if (c2 && names.length && typeof Chart !== 'undefined') {
-      chartInsts.push(new Chart(c2, {
-        type: 'bar',
-        data: { labels: names, datasets: [{
-          label:'ساعات', data:hData,
-          backgroundColor:'rgba(16,185,129,.7)', borderColor:'#10b981',
-          borderWidth:1, borderRadius:4
-        }]},
-        options: { indexAxis:'y', responsive:true, maintainAspectRatio:false,
-          plugins:{ legend:{display:false},
-            tooltip:{ callbacks:{ label:function(ctx){ return ctx.raw + ' ساعة'; } } }
-          },
-          scales:{
-            x:{ beginAtZero:true, ticks:{color:'#64748b', callback:function(v){ return v+'س'; }, font:{size:11}}, grid:{color:'rgba(30,45,74,.6)'} },
-            y:{ ticks:{color:'#e2e8f0', font:{size:12}}, grid:{display:false} }
-          }
-        }
-      }));
-    }
-  }, 80);
+    var c2=document.getElementById('hrChart');
+    if(c2&&names.length&&typeof Chart!=='undefined') chartInsts.push(new Chart(c2,{type:'bar',data:{labels:names,datasets:[{label:'ساعات',data:hData,backgroundColor:'rgba(16,185,129,.7)',borderColor:'#10b981',borderWidth:1,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ctx.raw+' ساعة';}}}},scales:{x:{beginAtZero:true,ticks:{color:'#64748b',callback:function(v){return v+'س';},font:{size:11}},grid:{color:'rgba(30,45,74,.6)'}},y:{ticks:{color:'#e2e8f0',font:{size:12}},grid:{display:false}}}}}));
+  },80);
 }
 
-// ═══════════════════════════════════════════
-//  HELPERS
-// ═══════════════════════════════════════════
-function setLoading(on) {
-  document.getElementById('spinner').style.display  = on ? 'inline-block' : 'none';
-  document.getElementById('btnLabel').textContent   = on ? 'جارٍ التحميل...' : 'تحميل';
-  document.getElementById('btnLoad').disabled       = on;
+// ── helpers ──
+function setLoading(on){
+  document.getElementById('spinner').style.display=on?'inline-block':'none';
+  document.getElementById('btnLabel').textContent=on?'جارٍ التحميل...':'تحميل';
+  document.getElementById('btnLoad').disabled=on;
 }
-
-function showState(icon, msg) {
-  document.getElementById('metricsRow').style.display = 'none';
-  document.getElementById('tabsRow').style.display    = 'none';
-  document.getElementById('contentArea').innerHTML =
-    '<div class="card"><div class="state-box"><div class="state-icon">' + icon + '</div><p>' + msg + '</p></div></div>';
+function showState(icon,msg){
+  document.getElementById('metricsRow').style.display='none';
+  document.getElementById('tabsRow').style.display='none';
+  document.getElementById('contentArea').innerHTML='<div class="card"><div class="state-box"><div class="state-icon">'+icon+'</div><p>'+msg+'</p></div></div>';
 }
-
 var tTimer;
-function toast(msg, type) {
-  var icons = {ok:'✅', err:'❌', warn:'⚠️'};
-  var el = document.getElementById('toast');
-  document.getElementById('tMsg').textContent  = msg;
-  document.getElementById('tIcon').textContent = icons[type] || 'ℹ️';
-  el.className = 'toast ' + type + ' show';
+function toast(msg,type){
+  var icons={ok:'✅',err:'❌',warn:'⚠️'};
+  var el=document.getElementById('toast');
+  document.getElementById('tMsg').textContent=msg;
+  document.getElementById('tIcon').textContent=icons[type]||'ℹ️';
+  el.className='toast '+type+' show';
   clearTimeout(tTimer);
-  tTimer = setTimeout(function(){ el.className = 'toast ' + type; }, 4000);
+  tTimer=setTimeout(function(){el.className='toast '+type;},4000);
 }
 </script>
 </body>
