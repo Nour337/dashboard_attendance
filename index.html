@@ -223,6 +223,7 @@ var chartInsts   = [];
 var activeTab    = 'summary';
 var LONG_SHIFT   = 8;    // أكثر من كذا ساعة → تنبيه
 var SHORT_SHIFT  = 60;   // أقل من كذا دقيقة → تنبيه
+var MAX_DIST     = 80;   // أكثر من كذا متر → تنبيه
 
 // ═══════════════════════════════════════
 window.onload = function() {
@@ -302,8 +303,9 @@ function loadAll() {
         var role   =String(r.role||'').replace(/\s*\+\s*تحديد الوظيفة/g,'').trim();
         var day    =dayMap[r.day]||String(r.day||'');
         if (!name||!dateStr) return;
+        var dist = parseInt(String(r.distance||'0'))||0;
         ALL_RECORDS.push({date:dateStr,day:day,name:name,type:type,role:role,
-                          inTime:inTime||'—',outTime:outTime||'—'});
+                          inTime:inTime||'—',outTime:outTime||'—',dist:dist});
       });
       toast('تم تحميل '+ALL_RECORDS.length+' شفت ✅','ok');
       applyFilter();
@@ -361,8 +363,9 @@ function buildAndRender(){
     if (!ANALYSIS[n]) ANALYSIS[n]={name:n,job:r.role,days:{},totalMins:0,absences:[]};
     var a=ANALYSIS[n];
     if (!a.job&&r.role) a.job=r.role;
-    if (!a.days[r.date]) a.days[r.date]={date:r.date,day:r.day,records:[],mins:0,issues:[]};
+    if (!a.days[r.date]) a.days[r.date]={date:r.date,day:r.day,records:[],mins:0,issues:[],maxDist:0};
     a.days[r.date].records.push(r);
+    if (r.dist && r.dist > a.days[r.date].maxDist) a.days[r.date].maxDist = r.dist;
   });
 
   // حساب المدة والمشاكل لكل موظف × يوم
@@ -424,7 +427,10 @@ function buildAndRender(){
         addIssue(dayObj,'warn','🔁 انصراف مكرر ('+date+')',
           'سُجّل '+outs.length+' انصرافات في نفس اليوم: '+outs.join(' — ')+'.',n,date);
 
-      // 7. وردة ليلية
+      // 8. مسافة بعيدة (أكثر من MAX_DIST متر)
+      if (dayObj.maxDist > MAX_DIST)
+        addIssue(dayObj,'danger','📍 تسجيل من مكان بعيد ('+date+')',
+          'المسافة المسجلة '+dayObj.maxDist+' متر — أكثر من '+MAX_DIST+' متر من المعمل. تحقق من الموقع.',n,date);
       if (ins.length>0&&outs.length>0){
         ins.sort(); outs.sort();
         var i0=t2m(ins[0]), o0=t2m(outs[outs.length-1]);
@@ -555,6 +561,8 @@ function renderSummary(){
         html+='<div class="time-block"><span class="tl">انصراف</span><span class="time-val" style="color:var(--red)">'+outShow+'</span></div>';
         html+='</div>';
         html+='<div class="day-dur">'+fmtDur(dayObj.mins)+'</div>';
+        var distColor = dayObj.maxDist > MAX_DIST ? 'var(--red)' : 'var(--muted)';
+        if (dayObj.maxDist > 0) html+='<div style="font-size:11px;color:'+distColor+';min-width:50px;text-align:center" title="المسافة من المعمل">📍'+dayObj.maxDist+'م</div>';
         if (hasIss){
           var issIdx=encodeURIComponent(n)+'__'+encodeURIComponent(dayObj.date);
           html+='<span class="badge b-err clickable" onclick="showDayIssues(\''+n+'\',\''+dayObj.date+'\')">⚠️ '+dayObj.issues.length+'</span>';
@@ -655,7 +663,7 @@ function renderRecords(){
   var html='<div class="card"><div class="card-label">جميع السجلات ('+sorted.length+')</div>';
   html+='<input class="search" type="text" placeholder="🔍 ابحث..." oninput="filterRec(this.value)">';
   html+='<div class="tbl-wrap"><table id="recTable"><thead><tr>';
-  html+='<th>الموظف</th><th>التاريخ</th><th>اليوم</th><th>الحالة</th><th>حضور</th><th>انصراف</th><th>المدة</th><th>الوظيفة</th>';
+  html+='<th>الموظف</th><th>التاريخ</th><th>اليوم</th><th>الحالة</th><th>حضور</th><th>انصراف</th><th>المدة</th><th>المسافة</th><th>الوظيفة</th>';
   html+='</tr></thead><tbody>';
   sorted.forEach(function(r){
     var cls=r.type==='كامل'?'b-ok':(r.type==='حضور فقط'?'b-info':'b-warn');
@@ -669,6 +677,8 @@ function renderRecords(){
     html+='<td style="color:var(--green);direction:ltr;text-align:right">'+r.inTime+'</td>';
     html+='<td style="color:var(--red);direction:ltr;text-align:right">'+r.outTime+'</td>';
     html+='<td style="color:var(--yellow)">'+dur+'</td>';
+    var dc = r.dist > MAX_DIST ? 'var(--red)' : 'var(--muted)';
+    html+='<td style="color:'+dc+';font-size:12px">'+(r.dist>0?r.dist+'م':'—')+'</td>';
     html+='<td style="color:var(--muted);font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+r.role+'">'+r.role+'</td></tr>';
   });
   html+='</tbody></table></div></div>';
