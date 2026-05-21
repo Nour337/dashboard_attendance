@@ -181,6 +181,8 @@ tr:hover td{background:var(--surface2);}
     <div class="metric"><div class="lbl">شفتات كاملة</div><div class="val" id="mFull" style="color:var(--green)">0</div><div class="sub">حضور+انصراف</div></div>
     <div class="metric"><div class="lbl">متوسط ساعات</div><div class="val" id="mAvg" style="color:var(--yellow)">—</div><div class="sub">لكل شفت</div></div>
     <div class="metric"><div class="lbl">أيام غياب</div><div class="val" id="mAbsent" style="color:var(--muted)">0</div><div class="sub">إجمالي</div></div>
+    <div class="metric"><div class="lbl">ساعات إضافية</div><div class="val" id="mOvertime" style="color:var(--blue-l)">0</div><div class="sub">يوم فوق 6س</div></div>
+    <div class="metric"><div class="lbl">يستحق وجبة</div><div class="val" id="mMeal" style="color:var(--purple)">0</div><div class="sub">يوم فوق 9س</div></div>
     <div class="metric"><div class="lbl">مشاكل</div><div class="val" id="mIssues" style="color:var(--red)">0</div><div class="sub">تحتاج مراجعة</div></div>
   </div>
 
@@ -221,7 +223,8 @@ var WORK_DAYS    = [];   // أيام العمل في الفترة المعروض
 var ISSUES       = [];
 var chartInsts   = [];
 var activeTab    = 'summary';
-var LONG_SHIFT   = 8;    // أكثر من كذا ساعة → تنبيه
+var OVERTIME_H   = 6;    // أكثر من كذا ساعة → ساعات إضافية
+var MEAL_H       = 9;    // أكثر من كذا ساعة → يستحق وجبة
 var SHORT_SHIFT  = 60;   // أقل من كذا دقيقة → تنبيه
 var MAX_DIST     = 80;   // أكثر من كذا متر → تنبيه
 
@@ -407,10 +410,16 @@ function buildAndRender(){
             'حضور الساعة '+r.inTime+' بدون تسجيل انصراف.',n,date);
       });
 
-      // 3. ساعات كتير جداً (فوق LONG_SHIFT)
-      if (dayObj.mins>LONG_SHIFT*60)
-        addIssue(dayObj,'warn','⏰ ساعات طويلة ('+date+')',
-          'المدة '+fmtDur(dayObj.mins)+' — أكثر من '+LONG_SHIFT+' ساعات. تأكد من صحة التسجيل.',n,date);
+      // 3. ساعات إضافية (فوق OVERTIME_H) — معلومة مش مشكلة
+      if (dayObj.mins > OVERTIME_H*60) {
+        var extraMins = dayObj.mins - OVERTIME_H*60;
+        dayObj.overtime = true;
+        dayObj.overTxt  = fmtDur(extraMins) + ' إضافي';
+      }
+      // 4. يستحق وجبة (فوق MEAL_H)
+      if (dayObj.mins > MEAL_H*60) {
+        dayObj.meal = true;
+      }
 
       // 4. شفت قصير جداً (أقل من SHORT_SHIFT دقيقة) — فقط لو في حضور وانصراف
       if (ins.length>0&&outs.length>0&&dayObj.mins>0&&dayObj.mins<SHORT_SHIFT)
@@ -460,11 +469,21 @@ function buildAndRender(){
   var totalAbsences=0;
   names.forEach(function(n){totalAbsences+=ANALYSIS[n].absences.length;});
 
+  var totalOvertimeDays=0, totalMealDays=0;
+  names.forEach(function(n){
+    Object.values(ANALYSIS[n].days).forEach(function(d){
+      if(d.meal) totalMealDays++;
+      else if(d.overtime) totalOvertimeDays++;
+    });
+  });
+
   document.getElementById('mTotal').textContent   = VIEW_RECORDS.length;
   document.getElementById('mNames').textContent   = names.length;
   document.getElementById('mFull').textContent    = fullShifts;
   document.getElementById('mAvg').textContent     = cnt?(totalH/cnt).toFixed(1):'—';
   document.getElementById('mAbsent').textContent  = totalAbsences;
+  document.getElementById('mOvertime').textContent= totalOvertimeDays;
+  document.getElementById('mMeal').textContent    = totalMealDays;
   document.getElementById('mIssues').textContent  = ISSUES.length;
   document.getElementById('metricsRow').style.display='grid';
   document.getElementById('tabsRow').style.display='flex';
@@ -513,6 +532,8 @@ function renderSummary(){
     var daysArr=Object.values(a.days).sort(function(x,y){return y.date.localeCompare(x.date);});
     var dCount=daysArr.length;
     var absCount=a.absences.length;
+    var overtimeDays = daysArr.filter(function(d){return d.overtime||d.meal;}).length;
+    var mealDays     = daysArr.filter(function(d){return d.meal;}).length;
     var hrs=Math.floor(a.totalMins/60), mins=Math.round(a.totalMins%60);
     var avgH=dCount&&a.totalMins?(a.totalMins/60/dCount).toFixed(1):'—';
     var pct=Math.round((a.totalMins/maxMins)*100);
@@ -535,6 +556,8 @@ function renderSummary(){
     html+='<div class="emp-stat-pill"><div class="esp-val" style="color:var(--yellow)">'+avgH+'</div><div class="esp-lbl">س/يوم</div></div>';
     if (absCount>0) html+='<span class="badge b-absent clickable" onclick="event.stopPropagation();showAbsences(\''+n+'\')">🗓 '+absCount+' غياب</span>';
     html+='<span class="badge '+bcls+'">'+btxt+'</span>';
+    if (mealDays>0)     html+='<span class="badge b-purple" title="أيام تستحق وجبة">🍽 '+mealDays+' وجبة</span>';
+    else if (overtimeDays>0) html+='<span class="badge b-info" title="أيام بساعات إضافية">⏱ '+overtimeDays+' إضافي</span>';
     if (iss.length>0) html+='<span class="badge b-err clickable" onclick="event.stopPropagation();showEmpIssues(\''+n+'\')">⚠️ '+iss.length+'</span>';
     html+='<span class="chevron" id="'+chevId+'">▾</span>';
     html+='</div></div>';
@@ -563,6 +586,9 @@ function renderSummary(){
         html+='<div class="day-dur">'+fmtDur(dayObj.mins)+'</div>';
         var distColor = dayObj.maxDist > MAX_DIST ? 'var(--red)' : 'var(--muted)';
         if (dayObj.maxDist > 0) html+='<div style="font-size:11px;color:'+distColor+';min-width:50px;text-align:center" title="المسافة من المعمل">📍'+dayObj.maxDist+'م</div>';
+        // ساعات إضافية ووجبة
+        if (dayObj.meal)     html+='<span class="badge b-purple" title="يستحق وجبة">🍽 وجبة</span>';
+        else if (dayObj.overtime) html+='<span class="badge b-info" title="'+dayObj.overTxt+'">⏱ '+dayObj.overTxt+'</span>';
         if (hasIss){
           var issIdx=encodeURIComponent(n)+'__'+encodeURIComponent(dayObj.date);
           html+='<span class="badge b-err clickable" onclick="showDayIssues(\''+n+'\',\''+dayObj.date+'\')">⚠️ '+dayObj.issues.length+'</span>';
