@@ -534,6 +534,9 @@ function renderSummary(){
     var absCount=a.absences.length;
     var overtimeDays = daysArr.filter(function(d){return d.overtime||d.meal;}).length;
     var mealDays     = daysArr.filter(function(d){return d.meal;}).length;
+    var totalOvertimeMins = 0;
+    daysArr.forEach(function(d){ if((d.overtime||d.meal)&&d.mins>OVERTIME_H*60) totalOvertimeMins+=d.mins-OVERTIME_H*60; });
+    var otHrs=Math.floor(totalOvertimeMins/60), otMins=Math.round(totalOvertimeMins%60);
     var hrs=Math.floor(a.totalMins/60), mins=Math.round(a.totalMins%60);
     var avgH=dCount&&a.totalMins?(a.totalMins/60/dCount).toFixed(1):'—';
     var pct=Math.round((a.totalMins/maxMins)*100);
@@ -557,7 +560,7 @@ function renderSummary(){
     if (absCount>0) html+='<span class="badge b-absent clickable" onclick="event.stopPropagation();showAbsences(\''+n+'\')">🗓 '+absCount+' غياب</span>';
     html+='<span class="badge '+bcls+'">'+btxt+'</span>';
     if (mealDays>0)     html+='<span class="badge b-purple" title="أيام تستحق وجبة">🍽 '+mealDays+' وجبة</span>';
-    else if (overtimeDays>0) html+='<span class="badge b-info" title="أيام بساعات إضافية">⏱ '+overtimeDays+' إضافي</span>';
+    if (overtimeDays>0) html+='<span class="badge b-info" title="إجمالي الساعات الإضافية">⏱ '+otHrs+'س '+otMins+'د إضافي</span>';
     if (iss.length>0) html+='<span class="badge b-err clickable" onclick="event.stopPropagation();showEmpIssues(\''+n+'\')">⚠️ '+iss.length+'</span>';
     html+='<span class="chevron" id="'+chevId+'">▾</span>';
     html+='</div></div>';
