@@ -356,11 +356,38 @@ function buildAndRender(){
   ANALYSIS={};
   WORK_DAYS=getDaysInRange(VIEW_RECORDS);
 
-  // جمع الأيام التي فيها أي سجل
   var datesWithRecord={};
   VIEW_RECORDS.forEach(function(r){ datesWithRecord[r.date]=true; });
 
-  // بناء ANALYSIS لكل موظف
+  // ── خطوة 1: معالجة الانصراف بعد منتصف الليل ──
+  // لو موظف عنده حضور في يوم X وانصراف في يوم X+1 الساعة قبل 06:00
+  // نربط الانصراف بيوم الحضور بدل ما يبقى يوم لوحده
+  var fixedRecords = VIEW_RECORDS.slice();
+  var checkinMap = {}; // name → آخر حضور بدون انصراف
+  fixedRecords.sort(function(a,b){ return a.date.localeCompare(b.date)||(a.inTime||'').localeCompare(b.inTime||''); });
+  fixedRecords.forEach(function(r){
+    var key = r.name;
+    if (r.type === 'حضور فقط') {
+      checkinMap[key] = r;
+    } else if (r.type === 'انصراف فقط' && checkinMap[key]) {
+      var prev = checkinMap[key];
+      // لو الانصراف في اليوم التالي والساعة قبل 06:00 → نربطه بيوم الحضور
+      var outH = t2m(r.outTime);
+      if (outH !== null && outH < 360) { // قبل 06:00
+        // نحول الانصراف لـ "كامل" ونضمه لنفس يوم الحضور
+        prev.type    = 'كامل';
+        prev.outTime = r.outTime;
+        r._merged    = true; // نشيله من الحساب
+        delete checkinMap[key];
+      }
+    } else if (r.type === 'كامل') {
+      delete checkinMap[key];
+    }
+  });
+  // نشيل السجلات المدموجة
+  VIEW_RECORDS = fixedRecords.filter(function(r){ return !r._merged; });
+
+  // ── خطوة 2: بناء ANALYSIS ──
   VIEW_RECORDS.forEach(function(r){
     var n=r.name;
     if (!ANALYSIS[n]) ANALYSIS[n]={name:n,job:r.role,days:{},totalMins:0,absences:[]};
@@ -378,12 +405,10 @@ function buildAndRender(){
     Object.keys(a.days).forEach(function(date){
       var dayObj=a.days[date];
       var recs=dayObj.records;
-
-      // أوقات الحضور والانصراف في اليوم ده
       var ins  = recs.filter(function(r){return r.inTime !=='—';}).map(function(r){return r.inTime;});
       var outs = recs.filter(function(r){return r.outTime!=='—';}).map(function(r){return r.outTime;});
 
-      // حساب المدة الإجمالية (من أول حضور لآخر انصراف)
+      // حساب المدة
       if (ins.length>0&&outs.length>0){
         ins.sort(); outs.sort();
         var inM=t2m(ins[0]), outM=t2m(outs[outs.length-1]);
@@ -394,7 +419,9 @@ function buildAndRender(){
         }
       }
 
-      // ── اكتشاف المشاكل ──
+      // هل اليوم جمعة؟
+      var isFriday = dayObj.day === 'الجمعة';
+      if (isFriday) dayObj.isFriday = true;
 
       // 1. انصراف بدون حضور
       recs.forEach(function(r){
@@ -403,60 +430,67 @@ function buildAndRender(){
             'انصراف الساعة '+r.outTime+' بدون أي حضور في نفس اليوم.',n,date);
       });
 
-      // 2. حضور بدون انصراف
+      // 2. حضور بدون انصراف — لكن لو الوقت قبل 06:00 ممكن يكون وردة ليلية لسه
       recs.forEach(function(r){
-        if (r.type==='حضور فقط')
-          addIssue(dayObj,'warn','⚠️ حضور بدون انصراف ('+date+')',
-            'حضور الساعة '+r.inTime+' بدون تسجيل انصراف.',n,date);
+        if (r.type==='حضور فقط'){
+          var inH = t2m(r.inTime);
+          // لو دخل بعد 06:00 → فعلاً مفيش انصراف
+          if (inH !== null && inH >= 360)
+            addIssue(dayObj,'warn','⚠️ حضور بدون انصراف ('+date+')',
+              'حضور الساعة '+r.inTime+' بدون تسجيل انصراف.',n,date);
+        }
       });
 
-      // 3. ساعات إضافية (فوق OVERTIME_H) — معلومة مش مشكلة
+      // 3. ساعات إضافية
       if (dayObj.mins > OVERTIME_H*60) {
-        var extraMins = dayObj.mins - OVERTIME_H*60;
         dayObj.overtime = true;
-        dayObj.overTxt  = fmtDur(extraMins) + ' إضافي';
+        dayObj.overTxt  = fmtDur(dayObj.mins - OVERTIME_H*60) + ' إضافي';
       }
-      // 4. يستحق وجبة (فوق MEAL_H)
-      if (dayObj.mins > MEAL_H*60) {
-        dayObj.meal = true;
-      }
+      // 4. وجبة
+      if (dayObj.mins > MEAL_H*60) { dayObj.meal = true; }
 
-      // 4. شفت قصير جداً (أقل من SHORT_SHIFT دقيقة) — فقط لو في حضور وانصراف
+      // 5. شفت قصير جداً
       if (ins.length>0&&outs.length>0&&dayObj.mins>0&&dayObj.mins<SHORT_SHIFT)
         addIssue(dayObj,'warn','⚡ شفت قصير جداً ('+date+')',
           'المدة '+fmtDur(dayObj.mins)+' فقط — أقل من ساعة. يبدو تسجيل خاطئ.',n,date);
 
-      // 5. حضور مكرر (أكثر من مرة)
+      // 6. حضور مكرر
       if (ins.length>1)
         addIssue(dayObj,'warn','🔁 حضور مكرر ('+date+')',
-          'سُجّل '+ins.length+' حضورات في نفس اليوم: '+ins.join(' — ')+'.',n,date);
+          'سُجّل '+ins.length+' حضورات: '+ins.join(' — ')+'.',n,date);
 
-      // 6. انصراف مكرر
+      // 7. انصراف مكرر
       if (outs.length>1)
         addIssue(dayObj,'warn','🔁 انصراف مكرر ('+date+')',
-          'سُجّل '+outs.length+' انصرافات في نفس اليوم: '+outs.join(' — ')+'.',n,date);
+          'سُجّل '+outs.length+' انصرافات: '+outs.join(' — ')+'.',n,date);
 
-      // 8. مسافة بعيدة (أكثر من MAX_DIST متر)
+      // 8. مسافة بعيدة
       if (dayObj.maxDist > MAX_DIST)
         addIssue(dayObj,'danger','📍 تسجيل من مكان بعيد ('+date+')',
-          'المسافة المسجلة '+dayObj.maxDist+' متر — أكثر من '+MAX_DIST+' متر من المعمل. تحقق من الموقع.',n,date);
+          'المسافة '+dayObj.maxDist+' متر — أكثر من '+MAX_DIST+' متر.',n,date);
+
+      // 9. وردة ليلية
       if (ins.length>0&&outs.length>0){
         ins.sort(); outs.sort();
         var i0=t2m(ins[0]), o0=t2m(outs[outs.length-1]);
         if (i0!==null&&o0!==null&&o0<i0&&dayObj.mins>SHORT_SHIFT)
           addIssue(dayObj,'info','🌙 وردة ليلية ('+date+')',
-            'حضور '+ins[0]+' وانصراف '+outs[outs.length-1]+' — الوردة ممتدة لفجر اليوم التالي.',n,date);
+            'حضور '+ins[0]+' وانصراف '+outs[outs.length-1]+' — ممتدة لفجر اليوم التالي.',n,date);
       }
     });
 
-    // ── حساب أيام الغياب لكل موظف ──
-    // أيام الغياب = أيام العمل التي ليس فيها أي سجل لهذا الموظف
-    // نعتمد على الأيام التي كان فيها أي موظف آخر (أيام العمل الفعلية)
-    a.absences=[];
+    // ── حساب الغياب (مع استثناء الجمعة) ──
+    a.absences   = [];
+    a.fridayWork = []; // جمعة جه فيها
     WORK_DAYS.forEach(function(wd){
-      if (!datesWithRecord[wd.date]) return;  // لو اليوم ده مافيهوش أي سجل خالص → يوم إجازة للكل
-      if (!a.days[wd.date]) {
-        a.absences.push({date:wd.date,dayName:wd.dayName});
+      if (!datesWithRecord[wd.date]) return;
+      var isFri = wd.dayName === 'الجمعة';
+      if (a.days[wd.date]) {
+        // جه في الجمعة → سجّله
+        if (isFri) a.fridayWork.push({date:wd.date, dayName:wd.dayName});
+      } else {
+        // غاب — لو جمعة مش غياب
+        if (!isFri) a.absences.push({date:wd.date, dayName:wd.dayName});
       }
     });
   });
@@ -468,7 +502,6 @@ function buildAndRender(){
   names.forEach(function(n){ var h=ANALYSIS[n].totalMins/60; if(h>0){totalH+=h;cnt++;} });
   var totalAbsences=0;
   names.forEach(function(n){totalAbsences+=ANALYSIS[n].absences.length;});
-
   var totalOvertimeDays=0, totalMealDays=0;
   names.forEach(function(n){
     Object.values(ANALYSIS[n].days).forEach(function(d){
@@ -558,6 +591,7 @@ function renderSummary(){
     html+='<div class="emp-stat-pill"><div class="esp-val" style="color:var(--green)">'+hrs+'س '+mins+'د</div><div class="esp-lbl">إجمالي</div></div>';
     html+='<div class="emp-stat-pill"><div class="esp-val" style="color:var(--yellow)">'+avgH+'</div><div class="esp-lbl">س/يوم</div></div>';
     if (absCount>0) html+='<span class="badge b-absent clickable" onclick="event.stopPropagation();showAbsences(\''+n+'\')">🗓 '+absCount+' غياب</span>';
+    if (a.fridayWork&&a.fridayWork.length>0) html+='<span class="badge b-warn clickable" onclick="event.stopPropagation();showFridayWork(\''+n+'\')" title="حضور يوم الجمعة — سعر مختلف">🌟 '+a.fridayWork.length+' جمعة</span>';
     html+='<span class="badge '+bcls+'">'+btxt+'</span>';
     if (mealDays>0)     html+='<span class="badge b-purple" title="أيام تستحق وجبة">🍽 '+mealDays+' وجبة</span>';
     if (overtimeDays>0) html+='<span class="badge b-info" title="إجمالي الساعات الإضافية">⏱ '+otHrs+'س '+otMins+'د إضافي</span>';
@@ -581,7 +615,7 @@ function renderSummary(){
         var outShow=allOuts.length ? allOuts.sort()[allOuts.length-1]    : '—';
 
         html+='<div class="'+rowCls+'">';
-        html+='<div><div class="day-date">'+dayObj.date+'</div><div class="day-day-lbl">'+dayObj.day+'</div></div>';
+        html+='<div><div class="day-date">'+dayObj.date+'</div><div class="day-day-lbl">'+dayObj.day+(dayObj.isFriday?' 🌟':'')+'</div></div>';
         html+='<div class="day-times">';
         html+='<div class="time-block"><span class="tl">حضور</span><span class="time-val" style="color:var(--green)">'+inShow+'</span></div>';
         html+='<div class="time-block"><span class="tl">انصراف</span><span class="time-val" style="color:var(--red)">'+outShow+'</span></div>';
@@ -661,8 +695,23 @@ function showAbsences(name){
   document.getElementById('modalBody').innerHTML=html;
   document.getElementById('modalOverlay').style.display='flex';
 }
+function showFridayWork(name){
+  var a=ANALYSIS[name];
+  if(!a)return;
+  var html='<div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:#fcd34d">⚠️ هذا الموظف حضر في أيام الجمعة — تحقق من سعر الساعة المختلف</div>';
+  a.fridayWork.forEach(function(fw){
+    var dayObj = a.days[fw.date];
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)">';
+    html+='<div><div style="font-weight:700;font-size:13px">'+fw.date+'</div><div style="font-size:11px;color:var(--muted)">الجمعة</div></div>';
+    html+='<div style="font-size:12px;color:var(--yellow)">'+(dayObj?fmtDur(dayObj.mins):'—')+'</div>';
+    html+='<span class="badge b-warn">🌟 جمعة</span>';
+    html+='</div>';
+  });
+  document.getElementById('modalTitle').textContent='🌟 حضور الجمعة — '+name;
+  document.getElementById('modalBody').innerHTML=html;
+  document.getElementById('modalOverlay').style.display='flex';
+}
 function openModal(title, iss){
-  document.getElementById('modalTitle').textContent=title;
   var html='';
   if(!iss.length){html='<p style="color:var(--muted);text-align:center;padding:20px">لا توجد مشاكل ✅</p>';}
   else{
