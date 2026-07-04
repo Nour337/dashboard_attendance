@@ -523,17 +523,19 @@ const DAY_NAMES=['الأحد','الاثنين','الثلاثاء','الأربع�
 const SHIFT_HOURS=6;
 const MEAL_PRICE=50;
 // قاعدة ساعات الشيفت: الجمعة 6 ساعات، بقية الأسبوع 7 ساعات، إلا الحالات المستثناة هنا (ثابتة كل أيام الأسبوع)
-const SHIFT_HOUR_EXCEPTIONS={'أحمد الحسيني':5,'شحته':5,'محمد صلاح':5,'هبه':5};
-function shiftHoursFor(empName,dayName){
-  var key=normalizeName(empName);
-  for(var k in SHIFT_HOUR_EXCEPTIONS){ if(normalizeName(k)===key) return SHIFT_HOUR_EXCEPTIONS[k]; }
-  return dayName==='الجمعة'?6:7;
-}
-  // لو الموظف اشتغل 9 ساعات أو أكتر في يوم واحد، مقياس الشفت لليوم ده يبقى 6
-// إلا أصحاب الاستثناءات الثابتة (SHIFT_HOUR_EXCEPTIONS) — بياخدوا رقمهم الثابت دايمًا
+// الاستثناءات مربوطة بالفرع — كل معمل مستقل تمامًا عن التاني
+// مفيش تأثير بين أسماء متشابهة في فروع مختلفة
+const SHIFT_HOUR_EXCEPTIONS={
+  'غرب الرئيسي':{'أحمد الحسيني':5,'شحته':5,'محمد صلاح':5,'هبه':5}
+};
+// لو الموظف اشتغل 9 ساعات أو أكتر في يوم واحد، مقياس الشفت لليوم ده يبقى 6
+// إلا أصحاب الاستثناءات الثابتة بتاعة فرعهم بس — بياخدوا رقمهم الثابت دايمًا
 function effectiveShiftHours(empName,dayName,dayMins){
   var key=normalizeName(empName);
-  for(var k in SHIFT_HOUR_EXCEPTIONS){ if(normalizeName(k)===key) return SHIFT_HOUR_EXCEPTIONS[k]; }
+  var branchMap=SHIFT_HOUR_EXCEPTIONS[currentBranch];
+  if(branchMap){
+    for(var k in branchMap){ if(normalizeName(k)===key) return branchMap[k]; }
+  }
   if(dayMins&&(dayMins/60)>=9) return 6;
   return dayName==='الجمعة'?6:7;
 }
@@ -582,9 +584,9 @@ const DEFAULT_EMPS=[
   {name:"تامر",branch:"غرب الرئيسي",type:"شيفتات",salary:0,friday:0,holiday:0,tahseen_rate:0,max_hawafiz:0,meal_full:0,meal_shift:100,shift_hours:7},
   {name:"وعد",branch:"غرب الرئيسي",type:"شيفتات",salary:0,friday:0,holiday:0,tahseen_rate:0,max_hawafiz:0,meal_full:0,meal_shift:100,shift_hours:7},
   {name:"رحمه جمال",branch:"غرب الرئيسي",type:"شيفتات",salary:0,friday:0,holiday:0,tahseen_rate:0,max_hawafiz:0,meal_full:0,meal_shift:100,shift_hours:7},
-  {name:"شحته",branch:"غرب الرئيسي",type:"شيفتات",salary:0,friday:0,holiday:0,tahseen_rate:0,max_hawafiz:0,meal_full:0,meal_shift:100,shift_hours:5.5},
-  {name:"محمد صلاح",branch:"غرب الرئيسي",type:"شيفتات",salary:0,friday:0,holiday:0,tahseen_rate:0,max_hawafiz:0,meal_full:0,meal_shift:100,shift_hours:7,role:"مدير المعمل"},
-  {name:"هبه",branch:"غرب الرئيسي",type:"شيفتات",salary:0,friday:0,holiday:0,tahseen_rate:0,max_hawafiz:0,meal_full:0,meal_shift:100,shift_hours:7,role:"مساعد مدير"},
+  {name:"شحته",branch:"غرب الرئيسي",type:"شيفتات",salary:0,friday:0,holiday:0,tahseen_rate:0,max_hawafiz:0,meal_full:0,meal_shift:100,shift_hours:5},
+  {name:"محمد صلاح",branch:"غرب الرئيسي",type:"شيفتات",salary:0,friday:0,holiday:0,tahseen_rate:0,max_hawafiz:0,meal_full:0,meal_shift:100,shift_hours:5,role:"مدير المعمل"},
+  {name:"هبه",branch:"غرب الرئيسي",type:"شيفتات",salary:0,friday:0,holiday:0,tahseen_rate:0,max_hawafiz:0,meal_full:0,meal_shift:100,shift_hours:5,role:"مساعد مدير"},
   // ────────── غرب المول ──────────
   {name:"أحمد الحسيني",branch:"غرب المول",type:"شيفتات",salary:0,friday:0,holiday:0,tahseen_rate:0,max_hawafiz:0,meal_full:0,meal_shift:100,shift_hours:6},
   {name:"إيمان أنور",branch:"غرب المول",type:"عادي",salary:0,friday:0,holiday:0,tahseen_rate:1,max_hawafiz:400,meal_full:50,meal_shift:100},
@@ -626,13 +628,21 @@ let monthInputs=[];
 function saveEmps(){LS.set('noor_emps',employees);}
 function mKey(y,m){return `noor_m_${y}_${m}`;}
 function attKey(y,m,ei){return `noor_att_${y}_${m}_${ei}`;}
+function getCasesForBranch(data,branch){
+  if(!data) return 0;
+  if(data.branchCases&&data.branchCases[branch]!=null) return data.branchCases[branch];
+  // توافق مع بيانات قديمة قبل تفعيل نظام الفروع — كانت بتخص "غرب الرئيسي" بس
+  if(branch==='غرب الرئيسي'&&data.cases!=null) return data.cases;
+  return 0;
+}
 function loadMonth(y,m){
   const s=LS.get(mKey(y,m));
   monthInputs=employees.map((_,i)=>{
     const def={work_days:0,shifts:0,shifts_friday:0,fridays:0,holidays:0,absence:0,mamouria:0,hawafiz:0,salary_loan:0,bonus:0,extra_hours:0,meals:0};
     return (s&&s.emps&&s.emps[i])?{...def,...s.emps[i]}:def;
   });
-  return s;
+  if(!s) return null;
+  return{...s,cases:getCasesForBranch(s,currentBranch)};
 }
 function fmt(n){return Math.round(n||0).toLocaleString('ar-EG');}
 function fmtDec(n){return (Math.round((n||0)*100)/100).toLocaleString('ar-EG');}
@@ -823,6 +833,10 @@ function setCurrentBranch(name,syncAttendanceUrl){
       saveUrl();
     }
   }
+  // كل فرع له "حالات المعمل" الخاصة بيه — نحدّث الخانة عند تبديل الفرع
+  var ms=loadMonth(currentYear,currentMonth);
+  var casesEl=document.getElementById('inp-cases');
+  if(casesEl) casesEl.value=ms?ms.cases:0;
   renderPayroll();
   renderSettings();
   renderHistory();
@@ -1000,98 +1014,13 @@ function pairRecordsGlobal(records){
   return cleanRecords;
 }  
 function buildAnalysisFromRecords(records){
-  // ملحوظة: الـ records هنا مفروض تكون DDD متدمجة بالفعل (جايه من PAIRED_RECORDS بعد الفلترة)
+  // ملحوظة: الـ records هنا مفروض تكون متدمجة بالفعل (جايه من PAIRED_RECORDS بعد الفلترة)
   var localIssues=[];
   var localAnalysis={};
   var workDays=getDaysInRange(records);
   var datesWithRecord={};
   records.forEach(r=>{datesWithRecord[r.date]=true;});
   var cleanRecords=records;
-
-  // ════ خوارزمية المطابقة الزمنية المحسّنة ════
-  // Pass 1: group by normalized employee name
-  var perEmp={};
-  records.forEach(r=>{
-    var key=normalizeName(r.name);
-    if(!perEmp[key]) perEmp[key]=[];
-    perEmp[key].push(r);
-  });
-
-  var cleanRecords=[];
-  Object.values(perEmp).forEach(empRecs=>{
-    // Build a stable sort key using date + effective time
-    function sortKey(r){
-      var t;
-      if(r.type==='انصراف فقط'){
-        t=(r.outTime&&r.outTime!=='—')?r.outTime:'23:59';
-      } else {
-        t=(r.inTime&&r.inTime!=='—')?r.inTime:'23:59';
-      }
-      return r.date+'T'+t;
-    }
-    empRecs.sort((a,b)=>sortKey(a).localeCompare(sortKey(b)));
-
-    var openCheckin=null;
-    empRecs.forEach(r=>{
-      if(r.type==='حضور فقط'){
-        if(openCheckin){
-          // Previous checkin never got paired — push as orphan but check if it's a cross-day
-          cleanRecords.push(openCheckin);
-        }
-        openCheckin=r;
-      }
-      else if(r.type==='انصراف فقط'){
-        if(openCheckin){
-          var outH=t2m(r.outTime), inH=t2m(openCheckin.inTime);
-          var isCrossDay=r.date!==openCheckin.date;
-          // Cross-day pairing: always allow if checkout is on a later date
-          if(!isCrossDay&&inH!==null&&outH!==null&&outH<=inH){
-            // Same day but checkout before checkin — invalid pair
-            cleanRecords.push(r);
-          } else {
-          openCheckin.type='كامل';
-          openCheckin.outTime=r.outTime;
-          openCheckin.dist=Math.max(openCheckin.dist||0, r.dist||0);
-          if(isCrossDay&&outH!==null&&outH>=300) openCheckin._crossMidnightLate=true;
-          cleanRecords.push(openCheckin);
-          openCheckin=null;
-        }
-        } else {
-          cleanRecords.push(r); // انصراف بدون حضور
-        }
-      } else { // type === 'كامل' already
-        if(openCheckin){cleanRecords.push(openCheckin);openCheckin=null;}
-        cleanRecords.push(r);
-      }
-    });
-    if(openCheckin) cleanRecords.push(openCheckin);
-  });
-
-  // Pass 2: cross-day orphan rescue — if a checkin has no checkout, 
-  // look for the earliest checkout-only on the NEXT day from the same employee
-  var orphanCheckins=cleanRecords.filter(r=>r.type==='حضور فقط');
-  orphanCheckins.forEach(orphan=>{
-    var orphanDate=orphan.date;
-    var nextDay=new Date(orphanDate+'T00:00');
-    nextDay.setDate(nextDay.getDate()+1);
-    var nextDayStr=nextDay.getFullYear()+'-'+String(nextDay.getMonth()+1).padStart(2,'0')+'-'+String(nextDay.getDate()).padStart(2,'0');
-    // Find the first checkout-only record on the next day from the same person
-    var rescueIdx=cleanRecords.findIndex(r=>
-      r!==orphan&&
-      normalizeName(r.name)===normalizeName(orphan.name)&&
-      r.date===nextDayStr&&
-      r.type==='انصراف فقط'
-    );
-    if(rescueIdx!==-1){
-      var rescue=cleanRecords[rescueIdx];
-      // Convert orphan to complete shift
-      orphan.type='كامل';
-      orphan.outTime=rescue.outTime;
-      orphan._rescuedCrossDay=true;
-      // Remove the rescue checkout from cleanRecords
-      cleanRecords.splice(rescueIdx,1);
-    }
-  });
 
   function addIssueLocal(dayObj,sev,title,desc,name,date){
     var iss={sev:sev,name:name,date:date,title:name+' — '+title,desc:desc};
@@ -1117,7 +1046,6 @@ function buildAnalysisFromRecords(records){
       var isFriday=dayObj.day==='الجمعة';
       if(isFriday) dayObj.isFriday=true;
 
-      // ════ كل شفت كامل بيتحسب لوحده (session)، وبيتجمعوا فوق بعض ════
       recs.forEach(r=>{
         if(r.type==='كامل'){
           var inM=t2m(r.inTime),outM=t2m(r.outTime);
@@ -1149,7 +1077,6 @@ function buildAnalysisFromRecords(records){
           var dayOT=dayObj.mins-(shiftsToday*daySH*60);
           if(dayOT>0){dayObj.overtime=true;dayObj.overtimeMins=dayOT;dayObj.overTxt=fmtDur(dayOT)+' إضافي';}
         } else {
-          // شفت غير مكتمل: الساعات دي بتتحول لإضافي عشان تتحسب وتتدفع
           dayObj.incomplete=true;
           dayObj.overtime=true;
           dayObj.overtimeMins=dayObj.mins;
@@ -1785,11 +1712,14 @@ function recalcAll(){renderPayroll();}
 function saveMonth(){
   var cases=parseInt(document.getElementById('inp-cases').value)||0;
   var days=parseInt(document.getElementById('inp-days').value)||30;
-  var data={year:currentYear,month:currentMonth,cases,days,emps:monthInputs.map(inp=>({...inp})),savedAt:new Date().toISOString()};
+  var existing=LS.get(mKey(currentYear,currentMonth))||{};
+  var branchCases=existing.branchCases||{};
+  branchCases[currentBranch]=cases;
+  var data={year:currentYear,month:currentMonth,cases:existing.cases,branchCases:branchCases,days,emps:monthInputs.map(inp=>({...inp})),savedAt:new Date().toISOString()};
   LS.set(mKey(currentYear,currentMonth),data);
   var btn=document.getElementById('fab-save');
   btn.classList.add('saved');btn.innerHTML='✅ تم الحفظ';
-  toast('✅ تم حفظ '+MONTHS[currentMonth],'ok');
+  toast('✅ تم حفظ '+MONTHS[currentMonth]+' — فرع '+currentBranch,'ok');
   setTimeout(()=>{btn.classList.remove('saved');btn.innerHTML='💾 حفظ الشهر';},2500);
 }
 function onMonthChange(){
@@ -1832,7 +1762,7 @@ function renderHistory(){
   keys.forEach(key=>{
     var data=LS.get(key);
     if(!data||!data.emps) return;
-    var cases=data.cases||0,days=data.days||30;
+    var cases=getCasesForBranch(data,currentBranch),days=data.days||30;
     var tmpInps=data.emps.map(e=>({work_days:0,shifts:0,fridays:0,holidays:0,absence:0,hawafiz:0,salary_loan:0,bonus:0,extra_hours:0,meals:0,...e}));
     var origInps=monthInputs;monthInputs=tmpInps;
     var total=0;
