@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#070d1a">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>معامل النور —  نظام متكامل</title>
+<title>معامل النور — نظام متكامل</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
@@ -1448,7 +1448,8 @@ function applySyncFromAnalysis(analysisObj){
   var synced=0;
   var matchedKeys={};
   var analysisList=Object.values(analysisObj);
-  employees.forEach((emp,ei)=>{
+  branchIndices().forEach(ei=>{
+    var emp=employees[ei];
     var empKey=normalizeName(emp.name);
     var a=analysisList.find(x=>normalizeName(x.name)===empKey);
     if(!a) return;
@@ -1803,17 +1804,19 @@ function downloadCSV(){
   var cases=parseInt(document.getElementById('inp-cases').value)||0;
   var days=parseInt(document.getElementById('inp-days').value)||30;
   var rows=[['الاسم','النوع','المرتب','الشيفتات/أيام','الغياب','الجمع','إجازات','وجبات','إضافي','قيمة الإضافي','تحسين','حوافز','مكافأة','سلف','الإجمالي'].join(',')];
-  employees.forEach((emp,i)=>{
+  var idxs=branchIndices();
+  idxs.forEach(i=>{
+    var emp=employees[i];
     var inp=monthInputs[i]||{};var res=calcOne(i,cases,days);
     var q=v=>`"${String(v).replace(/"/g,'""')}"`;
     rows.push([q(emp.name),q(emp.type),emp.salary,emp.type==='شيفتات'?(inp.shifts||0):(inp.work_days||0),inp.absence||0,inp.fridays||0,inp.holidays||0,inp.meals||0,inp.extra_hours||0,Math.round(res.ot_pay||0),Math.round(res.tahseen||0),Math.round(res.hawafiz||0),Math.round(res.bonus||0),Math.round(res.loan||0),Math.round(res.total||0)].join(','));
   });
-  var gt=employees.reduce((s,_,i)=>s+calcOne(i,cases,days).total,0);
+  var gt=idxs.reduce((s,i)=>s+calcOne(i,cases,days).total,0);
   rows.push(['"الإجمالي"','','','','','','','','','','','','','',Math.round(gt)].join(','));
   var csv='\uFEFF'+rows.join('\n');
   var a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
-  a.download=`مرتبات_${MONTHS[currentMonth]}_${currentYear}.csv`;
+  a.download=`مرتبات_${currentBranch}_${MONTHS[currentMonth]}_${currentYear}.csv`;
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   toast('📊 تم تنزيل CSV','ok');
 }
@@ -1874,7 +1877,10 @@ function renderLeave(){
   var cont=document.getElementById('leave-list');
   var ld=LS.get('noor_leave')||{};
   cont.innerHTML='';
-  employees.forEach((emp,i)=>{
+  var idxs=branchIndices();
+  if(!idxs.length){cont.innerHTML='<div class="card"><div class="state-box"><div class="state-icon">🏖️</div><p>لا يوجد موظفون في هذا الفرع بعد</p></div></div>';return;}
+  idxs.forEach(i=>{
+    var emp=employees[i];
     var el=(ld[i]&&ld[i][currentYear])||{};
     var manualTaken=Object.values(el).reduce((a,b)=>a+(parseInt(b)||0),0);
     var stats=getYearLeaveStats(i,currentYear);
