@@ -1534,9 +1534,14 @@ function buildEmpBody(i,emp,inp,res,days,cases){
   var warn=!isShift&&res.effectiveAbsence>2;
   var totalNormalStaff=employees.filter(e=>e.type==='عادي'&&e.tahseen_rate>0&&e.branch===emp.branch).length;
   var eligibleCount=employees.filter((e,j)=>{
-    var ea=Math.max(0,((monthInputs[j]||{}).absence||0)-((monthInputs[j]||{}).fridays||0));
+    var inpJ=monthInputs[j]||{};
+    var rawAbs=inpJ.absence||0;
+    var friCredit=Math.min(inpJ.fridays||0,rawAbs);
+    var afterFri=Math.max(0,rawAbs-friCredit);
+    var mamCredit=Math.min(inpJ.mamouria||0,afterFri);
+    var ea=Math.max(0,afterFri-mamCredit);
     return employees[j].type==='عادي'&&employees[j].tahseen_rate>0&&employees[j].branch===emp.branch&&ea<=2;
-  }).length;
+}).length;
   var html=warn?'<div style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.4);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--red);font-weight:700;margin-top:10px">⚠️ الغياب الفعلي '+res.effectiveAbsence+' يوم بعد خصم إجازة الجمعة — مفيش حوافز</div>':'';
   html+='<div class="sec-title">الحضور</div>';
   if(isShift){
