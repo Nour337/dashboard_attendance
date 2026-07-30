@@ -526,7 +526,8 @@ const MEAL_PRICE=50;
 // الاستثناءات مربوطة بالفرع — كل معمل مستقل تمامًا عن التاني
 // مفيش تأثير بين أسماء متشابهة في فروع مختلفة
 const SHIFT_HOUR_EXCEPTIONS={
-  'غرب الرئيسي':{'أحمد الحسيني':5,'شحته':5,'محمد صلاح':5,'هبه':5}
+  'غرب الرئيسي':{'أحمد الحسيني':5,'شحته':5,'محمد صلاح':5,'هبه':5},
+  'غرب المول':{'إيمان أنور':6,'راندا':7,'مريم':7}
 };
 // لو الموظف اشتغل 9 ساعات أو أكتر في يوم واحد، مقياس الشفت لليوم ده يبقى 6
 // إلا أصحاب الاستثناءات الثابتة بتاعة فرعهم بس — بياخدوا رقمهم الثابت دايمًا
@@ -588,16 +589,16 @@ const DEFAULT_EMPS=[
   {name:"محمد صلاح",branch:"غرب الرئيسي",type:"شيفتات",salary:0,friday:0,holiday:0,tahseen_rate:0,max_hawafiz:0,meal_full:0,meal_shift:100,shift_hours:5,role:"مدير المعمل"},
   {name:"هبه",branch:"غرب الرئيسي",type:"شيفتات",salary:0,friday:0,holiday:0,tahseen_rate:0,max_hawafiz:0,meal_full:0,meal_shift:100,shift_hours:5,role:"مساعد مدير"},
   // ────────── غرب المول ──────────
-  {name:"أحمد الحسيني",branch:"غرب المول",type:"شيفتات",salary:0,friday:0,holiday:0,tahseen_rate:0,max_hawafiz:0,meal_full:0,meal_shift:100,shift_hours:6},
-  {name:"إيمان أنور",branch:"غرب المول",type:"عادي",salary:0,friday:0,holiday:0,tahseen_rate:1,max_hawafiz:400,meal_full:50,meal_shift:100},
+  {name:"أحمد الحسيني",branch:"غرب المول",type:"شيفتات",salary:0,friday:0,holiday:0,tahseen_rate:0,max_hawafiz:0,meal_full:0,meal_shift:0,role:"مدير الفرع",quota_hours:156,fixed_ot_rate:100},
+  {name:"إيمان أنور",branch:"غرب المول",type:"شيفتات",salary:300,friday:0,holiday:0,tahseen_rate:0,max_hawafiz:0,meal_full:0,meal_shift:100,shift_hours:6},
   {name:"سهيله",branch:"غرب المول",type:"عادي",salary:0,friday:0,holiday:0,tahseen_rate:1,max_hawafiz:400,meal_full:50,meal_shift:100},
   {name:"غاده",branch:"غرب المول",type:"عادي",salary:0,friday:0,holiday:0,tahseen_rate:1,max_hawafiz:400,meal_full:50,meal_shift:100},
   {name:"أسماء",branch:"غرب المول",type:"عادي",salary:0,friday:0,holiday:0,tahseen_rate:1,max_hawafiz:400,meal_full:50,meal_shift:100},
-  {name:"مريم",branch:"غرب المول",type:"عادي",salary:0,friday:0,holiday:0,tahseen_rate:1,max_hawafiz:400,meal_full:50,meal_shift:100},
+  {name:"مريم",branch:"غرب المول",type:"شيفتات",salary:140,friday:0,holiday:0,tahseen_rate:0,max_hawafiz:0,meal_full:0,meal_shift:100,shift_hours:7},
   {name:"ربا",branch:"غرب المول",type:"عادي",salary:0,friday:0,holiday:0,tahseen_rate:1,max_hawafiz:400,meal_full:50,meal_shift:100},
-  {name:"هاجر",branch:"غرب المول",type:"شيفتات",salary:0,friday:0,holiday:0,tahseen_rate:0,max_hawafiz:0,meal_full:0,meal_shift:100,shift_hours:6},
-  {name:"راندا",branch:"غرب المول",type:"شيفتات",salary:0,friday:0,holiday:0,tahseen_rate:0,max_hawafiz:0,meal_full:0,meal_shift:100,shift_hours:6},
-  {name:"حنين",branch:"غرب المول",type:"شيفتات",salary:0,friday:0,holiday:0,tahseen_rate:0,max_hawafiz:0,meal_full:0,meal_shift:100,shift_hours:6},
+  {name:"هاجر",branch:"غرب المول",type:"عادي",salary:3500,friday:0,holiday:0,tahseen_rate:1,max_hawafiz:400,meal_full:50,meal_shift:100},
+  {name:"راندا",branch:"غرب المول",type:"شيفتات",salary:140,friday:0,holiday:0,tahseen_rate:0,max_hawafiz:0,meal_full:0,meal_shift:100,shift_hours:7},
+  {name:"حنين",branch:"غرب المول",type:"عادي",salary:3000,friday:0,holiday:0,tahseen_rate:1,max_hawafiz:400,meal_full:50,meal_shift:100},
   // ────────── غرب المعاهدة ──────────
   {name:"انجي",branch:"غرب المعاهدة",type:"عادي",salary:0,friday:0,holiday:0,tahseen_rate:1,max_hawafiz:400,meal_full:50,meal_shift:100},
   {name:"أم كامل",branch:"غرب المعاهدة",type:"عادي",salary:0,friday:0,holiday:0,tahseen_rate:1,max_hawafiz:400,meal_full:50,meal_shift:100},
@@ -1402,6 +1403,7 @@ function applySyncFromAnalysis(analysisObj){
     monthInputs[ei].meals=totalMeals;
     monthInputs[ei].work_days=totalDays;
     monthInputs[ei].absence=a.absences.length;
+    monthInputs[ei].total_hours_worked=Math.round((a.totalMins/60)*100)/100;
     synced++;
   });
   var unmatched=analysisList.filter(a=>!matchedKeys[normalizeName(a.name)]).map(a=>a.name);
@@ -1460,7 +1462,15 @@ function calcOne(i,totalCases,daysInMonth){
   var qualifies=!isShift&&effectiveAbsence<=2;
   var base=0,deduction=0,tahseen=0,hawafiz=0,meals=0,fri_pay=0,hol_pay=0,ot_pay=0,bonus=0,loan=0;
   var extraHrs=inp.extra_hours||0;
-  if(isShift){
+  var isQuota=!!emp.quota_hours;
+  if(isQuota){
+    // نظام حصة ساعات شهرية: مفيش مرتب أساسي ولا سعر شيفت، الدفع بس على الساعات اللي فوق الحصة
+    var totalHrsQ=inp.total_hours_worked||0;
+    var extraQuotaHrs=Math.max(0,totalHrsQ-emp.quota_hours);
+    ot_pay=Math.round(extraQuotaHrs*(emp.fixed_ot_rate||0));
+    meals=(inp.meals||0)*MEAL_PRICE;
+    hol_pay=(inp.holidays||0)*(emp.holiday||0);
+  } else if(isShift){
     var shiftsFriday=inp.shifts_friday||0;
     base=(inp.shifts||0)*emp.salary + shiftsFriday*emp.friday;
     var empSH=emp.shift_hours||SHIFT_HOURS;
@@ -1486,9 +1496,10 @@ function calcOne(i,totalCases,daysInMonth){
   bonus=(inp.bonus||0)+(emp.bonus_fixed||0);
   loan=inp.salary_loan||0;
   var total=base-deduction+tahseen+hawafiz+meals+fri_pay+hol_pay+ot_pay+bonus-loan;
-  var hr_display=isShift?emp.salary/SHIFT_HOURS:(daysInMonth>0?emp.salary/daysInMonth/SHIFT_HOURS:0);
-  return{base,deduction,tahseen,hawafiz,meals,fri_pay,hol_pay,ot_pay,bonus,loan,total,qualifies,isShift,
-         hr:hr_display,rawAbsence,effectiveAbsence,fridayLeaveCredit,mamouriaCredit,shiftsFriday:isShift?(inp.shifts_friday||0):0};
+  var hr_display=isQuota?(emp.fixed_ot_rate||0):(isShift?emp.salary/SHIFT_HOURS:(daysInMonth>0?emp.salary/daysInMonth/SHIFT_HOURS:0));
+  return{base,deduction,tahseen,hawafiz,meals,fri_pay,hol_pay,ot_pay,bonus,loan,total,qualifies,isShift,isQuota,
+         hr:hr_display,rawAbsence,effectiveAbsence,fridayLeaveCredit,mamouriaCredit,shiftsFriday:isShift?(inp.shifts_friday||0):0,
+         totalHrsWorked:inp.total_hours_worked||0,extraQuotaHrs:isQuota?Math.max(0,(inp.total_hours_worked||0)-emp.quota_hours):0};
 }
 
 function renderPayroll(){
@@ -1531,6 +1542,28 @@ function renderPayroll(){
 
 function buildEmpBody(i,emp,inp,res,days,cases){
   var isShift=res.isShift;
+  if(res.isQuota){
+    var html2='<div class="sec-title">حصة الساعات الشهرية</div>';
+    html2+=frow('إجمالي ساعات العمل هذا الشهر',`<input type="number" class="fi" value="${inp.total_hours_worked||0}" min="0" step="0.1" onchange="si(${i},'total_hours_worked',this.value)">`,'بيتزامن من الحضور تلقائيًا');
+    html2+=frow('الحصة الشهرية المجانية',`<span style="font-weight:900;color:var(--muted)">${emp.quota_hours} س</span>`);
+    html2+=frow('الساعات الإضافية المستحقة',`<span style="font-weight:900;color:var(--yellow)">${fmtDec(res.extraQuotaHrs)} س</span>`,fmt(emp.fixed_ot_rate||0)+' ج/ساعة');
+    html2+=frow('وجبات (فوق 10 ساعات)',`<input type="number" class="fi green" value="${inp.meals||0}" min="0" onchange="si(${i},'meals',this.value)">`,'50 ج / وجبة');
+    html2+=frow('إجازات رسمية',`<input type="number" class="fi" value="${inp.holidays||0}" min="0" onchange="si(${i},'holidays',this.value)">`,emp.holiday>0?emp.holiday+' ج/يوم':'');
+    html2+='<div class="sec-title">مكافآت وخصومات</div>';
+    html2+=frow('مكافأة إضافية',`<input type="number" class="fi gold" value="${inp.bonus||0}" min="0" onchange="si(${i},'bonus',this.value)">`);
+    html2+=frow('سلف الشهر',`<input type="number" class="fi" style="border-color:var(--red)" value="${inp.salary_loan||0}" min="0" onchange="si(${i},'salary_loan',this.value)">`,'بيتخصم');
+    html2+=`<div class="bk"><div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:7px">تفصيل الحساب</div>
+      ${bkRow('ساعات إضافية ('+fmtDec(res.extraQuotaHrs)+' × '+fmt(emp.fixed_ot_rate||0)+' ج/س)',res.ot_pay,'p')}
+      ${res.hol_pay>0?bkRow('إجازة رسمية',res.hol_pay,'p'):''}
+      ${res.meals>0?bkRow('وجبات ('+inp.meals+'×'+MEAL_PRICE+')',res.meals,'p'):''}
+      ${emp.bonus_fixed>0?bkRow('بدل ثابت',emp.bonus_fixed,'p'):''}
+      ${(res.bonus-(emp.bonus_fixed||0))>0?bkRow('مكافأة إضافية',(res.bonus-(emp.bonus_fixed||0)),'p'):''}
+      ${res.loan>0?bkRow('سلف',-res.loan,'m'):''}
+      <div class="bk-total"><span>الإجمالي</span><span>${fmt(res.total)} جنيه</span></div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:10px" onclick="showEmpReport(${i})">📤 تقرير للموظف (واتساب / طباعة)</button>`;
+    return html2;
+  }
   var warn=!isShift&&res.effectiveAbsence>2;
   var totalNormalStaff=employees.filter(e=>e.type==='عادي'&&e.tahseen_rate>0&&e.branch===emp.branch).length;
   var eligibleCount=employees.filter((e,j)=>{
@@ -1881,6 +1914,8 @@ function openEmpSettings(i){
     {k:'name',lbl:'الاسم',type:'text'},{k:'salary',lbl:'سعر الشيفتة',type:'number'},
     {k:'shift_hours',lbl:'ساعات الشيفت',type:'number'},
     {k:'friday',lbl:'سعر الجمعة',type:'number'},{k:'holiday',lbl:'سعر الإجازة الرسمية',type:'number'},
+    {k:'quota_hours',lbl:'حصة الساعات الشهرية (0 = غير منطبق)',type:'number'},
+    {k:'fixed_ot_rate',lbl:'سعر الساعة الإضافية الثابت (لو حصة ساعات)',type:'number'},
   ];
   var fHtml=fields.map(f=>`<div class="modal-field"><label>${f.lbl}</label><input type="${f.type}" id="sf_${f.k}" value="${emp[f.k]||0}"></div>`).join('');
   var branchOpts=BRANCHES.map(b=>`<option value="${b.name}" ${b.name===emp.branch?'selected':''}>${b.name}</option>`).join('');
@@ -1891,7 +1926,7 @@ function openEmpSettings(i){
   document.getElementById('modalOverlay').style.display='flex';
 }
 function saveEmpSettings(i){
-  ['name','salary','friday','holiday','tahseen_rate','shift_hours','bonus_fixed'].forEach(k=>{
+  ['name','salary','friday','holiday','tahseen_rate','shift_hours','bonus_fixed','quota_hours','fixed_ot_rate'].forEach(k=>{
     var el=document.getElementById('sf_'+k);if(!el)return;
     employees[i][k]=el.type==='text'?el.value:(parseFloat(el.value)||0);
   });
