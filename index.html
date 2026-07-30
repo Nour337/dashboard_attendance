@@ -9,7 +9,7 @@
 <title>معامل النور — نظام متكامل</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/[email protected]/dist/exceljs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js" onerror="window._exceljsFailed=true"></script>
 <style>
 /* ════ TOKENS ════ */
 :root{
@@ -1791,7 +1791,22 @@ function downloadCSV(){
   toast('📊 تم تنزيل CSV','ok');
 }
 async function downloadExcelFormatted(){
-  if(typeof ExcelJS==='undefined'){toast('⚠️ مكتبة Excel لسه بتحمّل، جرب تاني بعد ثانية','warn');return;}
+  if(typeof ExcelJS==='undefined'){
+    if(window._exceljsFailed){
+      toast('❌ مكتبة Excel اتحجبت — تأكد من الإنترنت أو جرب شبكة تانية','err');
+      return;
+    }
+    toast('⏳ بنجهز مكتبة Excel، استنى ثانيتين...','warn');
+    var waited=0;
+    while(typeof ExcelJS==='undefined'&&waited<6000){
+      await new Promise(r=>setTimeout(r,300));
+      waited+=300;
+    }
+    if(typeof ExcelJS==='undefined'){
+      toast('❌ فشل تحميل مكتبة Excel — تأكد إن جهازك متصل بالإنترنت ومفيش حاجة بتحجب jsdelivr.net','err');
+      return;
+    }
+  }
   var cases=parseInt(document.getElementById('inp-cases').value)||0;
   var days=parseInt(document.getElementById('inp-days').value)||30;
   var idxs=branchIndices();
