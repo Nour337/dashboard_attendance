@@ -9,6 +9,7 @@
 <title>معامل النور — نظام متكامل</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/[email protected]/dist/exceljs.min.js"></script>
 <style>
 /* ════ TOKENS ════ */
 :root{
@@ -439,6 +440,7 @@ tr:hover td{background:var(--s2)}
         <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn btn-ghost" onclick="syncAttToPayroll()">&#128260; إعادة المزامنة من الحضور</button>
           <button class="btn btn-ghost" onclick="downloadCSV()">&#128200; تنزيل CSV</button>
+          <button class="btn btn-ghost" onclick="downloadExcelFormatted()">&#128215; تنزيل Excel منسق</button>
         </div>
         <div id="syncStatus" style="margin-top:9px;font-size:11.5px;font-weight:700"></div>
       </div>
@@ -1787,6 +1789,77 @@ function downloadCSV(){
   a.download=`مرتبات_${currentBranch}_${MONTHS[currentMonth]}_${currentYear}.csv`;
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   toast('📊 تم تنزيل CSV','ok');
+}
+async function downloadExcelFormatted(){
+  if(typeof ExcelJS==='undefined'){toast('⚠️ مكتبة Excel لسه بتحمّل، جرب تاني بعد ثانية','warn');return;}
+  var cases=parseInt(document.getElementById('inp-cases').value)||0;
+  var days=parseInt(document.getElementById('inp-days').value)||30;
+  var idxs=branchIndices();
+
+  var wb=new ExcelJS.Workbook();
+  wb.creator='معامل النور';
+  var ws=wb.addWorksheet('مرتبات',{views:[{rightToLeft:true}]});
+
+  var cols=['الاسم','النوع','المرتب','الشيفتات/أيام','الغياب','الجمعة','إجازات','وجبات','إضافي (ساعة)','قيمة الإضافي','تحسين','حوافز','مكافأة','سلف','الإجمالي'];
+  ws.columns=cols.map(c=>({header:c,key:c,width:c==='الاسم'?20:14}));
+
+  // ═ تنسيق صف العناوين ═
+  var headerRow=ws.getRow(1);
+  headerRow.eachCell(cell=>{
+    cell.font={bold:true,color:{argb:'FFFFFFFF'},size:12};
+    cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF1D4ED8'}};
+    cell.alignment={horizontal:'center',vertical:'middle'};
+    cell.border={top:{style:'thin'},bottom:{style:'thin'},left:{style:'thin'},right:{style:'thin'}};
+  });
+  headerRow.height=24;
+
+  var grandTotal=0,grandLoan=0,grandTahseen=0;
+  idxs.forEach((i,rowIdx)=>{
+    var emp=employees[i];
+    var inp=monthInputs[i]||{};
+    var res=calcOne(i,cases,days);
+    grandTotal+=res.total;grandLoan+=res.loan;grandTahseen+=res.tahseen;
+    var row=ws.addRow({
+      'الاسم':emp.name,'النوع':emp.type,
+      'المرتب':emp.salary,
+      'الشيفتات/أيام':emp.type==='شيفتات'?(inp.shifts||0):(inp.work_days||0),
+      'الغياب':inp.absence||0,'الجمعة':inp.fridays||0,'إجازات':inp.holidays||0,
+      'وجبات':inp.meals||0,'إضافي (ساعة)':inp.extra_hours||0,
+      'قيمة الإضافي':Math.round(res.ot_pay||0),
+      'تحسين':Math.round(res.tahseen||0),'حوافز':Math.round(res.hawafiz||0),
+      'مكافأة':Math.round(res.bonus||0),'سلف':Math.round(res.loan||0),
+      'الإجمالي':Math.round(res.total||0)
+    });
+    row.eachCell(cell=>{
+      cell.border={top:{style:'thin',color:{argb:'FFD1D5DB'}},bottom:{style:'thin',color:{argb:'FFD1D5DB'}},left:{style:'thin',color:{argb:'FFD1D5DB'}},right:{style:'thin',color:{argb:'FFD1D5DB'}}};
+      cell.alignment={horizontal:'center',vertical:'middle'};
+    });
+    if(rowIdx%2===1){
+      row.eachCell(cell=>{cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF3F4F6'}};});
+    }
+    ws.getCell('A'+row.number).alignment={horizontal:'right',vertical:'middle'};
+    var totCell=ws.getCell('O'+row.number);
+    totCell.font={bold:true,color:{argb:res.total<0?'FFDC2626':'FF059669'}};
+  });
+
+  // ═ صف الإجمالي ═
+  var totalRow=ws.addRow({'الاسم':'الإجمالي','الإجمالي':Math.round(grandTotal),'سلف':Math.round(grandLoan),'تحسين':Math.round(grandTahseen)});
+  totalRow.eachCell(cell=>{
+    cell.font={bold:true,size:12,color:{argb:'FF1D4ED8'}};
+    cell.border={top:{style:'double'},bottom:{style:'thin'}};
+    cell.alignment={horizontal:'center',vertical:'middle'};
+  });
+  ws.getCell('A'+totalRow.number).alignment={horizontal:'right'};
+
+  ws.views=[{state:'frozen',ySplit:1,rightToLeft:true}];
+
+  var buf=await wb.xlsx.writeBuffer();
+  var blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`مرتبات_${currentBranch}_${MONTHS[currentMonth]}_${currentYear}.xlsx`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  toast('📗 تم تنزيل ملف Excel المنسق','ok');
 }
 
 // ═══════════════════════════════════════
